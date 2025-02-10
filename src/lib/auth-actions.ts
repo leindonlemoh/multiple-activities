@@ -1,33 +1,30 @@
-'use server'
+"use server";
 
-import { revalidatePath } from 'next/cache'
-import { redirect } from 'next/navigation'
-
-import { createClient } from '@/utils/supabase/server'
+import { createClient } from "@/utils/supabase/server";
 type Credentials = {
   email: string;
   password: string;
 };
 export async function login(formData: Credentials) {
-  const supabase = await createClient()
-  console.log(formData,"form")
-    // type-casting here for convenience
+  const supabase = await createClient();
+  console.log(formData, "form");
+  // type-casting here for convenience
   // in practice, you should validate your inputs
   const data = {
     email: formData?.email as string,
     password: formData?.password as string,
-  }
+  };
 
-  const { error } = await supabase.auth.signInWithPassword(data)
+  const { error } = await supabase.auth.signInWithPassword(data);
 
   // if (error) {
   //   redirect('/error')
 
   // }
-  if(error){
-    return {status:500, message:error?.message}
-  }else{
-    return {status:200,message: 'Successfully Logged In'}
+  if (error) {
+    return { status: 500, message: error?.message };
+  } else {
+    return { status: 200, message: "Successfully Logged In" };
   }
   // revalidatePath('/home', 'layout')
   // redirect('/home')
@@ -38,9 +35,9 @@ type SignupResponse = {
   data?: any;
 };
 
-export async function signup (userInfo: any): Promise<SignupResponse>{
+export async function signup(userInfo: any): Promise<SignupResponse> {
   const supabase = await createClient();
-console.log(userInfo,'sss')
+  console.log(userInfo, "sss");
   const firstName = userInfo.firstName;
   const lastName = userInfo.lastName;
 
@@ -55,31 +52,27 @@ console.log(userInfo,'sss')
     },
   };
 
-  const {error } = await supabase.auth.signUp(data);
+  const { error } = await supabase.auth.signUp(data);
 
   if (error) {
-    return { status: 500, message: error.message }; 
+    return { status: 500, message: error.message };
   }
 
-  return { status: 200, message: 'Signup successful!' }; 
-};
-
-
+  return { status: 200, message: "Signup successful!" };
+}
 
 export async function logout() {
-  const supabase = await createClient()
+  const supabase = await createClient();
 
-
-
-  const {error } = await supabase.auth.signOut()
+  const { error } = await supabase.auth.signOut();
 
   // if (error) {
   //   redirect('/error')
   // }
 
   if (error) {
-    return { status: 500, message: error.message }; 
+    return { status: 500, message: error.message };
   }
 
-  return { status: 200, message: 'Signed Out' }; 
+  return { status: 200, message: "Signed Out" };
 }

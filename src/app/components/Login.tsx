@@ -1,5 +1,5 @@
 "use client";
-import React, { useState, useEffect, ChangeEvent } from "react";
+import React, { useState, useEffect, ChangeEvent, FormEvent } from "react";
 import { login } from "@/lib/auth-actions";
 import { inputChange } from "@/lib/onChange";
 import Swal from "sweetalert2";
@@ -12,7 +12,7 @@ const Login = () => {
     password: "",
   });
 
-  const onLogIn = async (e: ChangeEvent) => {
+  const onLogIn = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     const response = await login(credentials);
 
@@ -32,7 +32,10 @@ const Login = () => {
   return (
     <div className="pt-5 rounded-lg">
       <h2 className="text-[#17114b] text-3xl text-center">Login</h2>
-      <form className="bg-[#3b5998] text-[#f7f7f7]  flex flex-col p-10 gap-6 rounded-lg shadow-lg w-full ">
+      <form
+        className="bg-[#3b5998] text-[#f7f7f7]  flex flex-col p-10 gap-6 rounded-lg shadow-lg w-full "
+        onSubmit={onLogIn}
+      >
         <label htmlFor="email" className="text-lg font-medium">
           Email:
         </label>
@@ -58,7 +61,6 @@ const Login = () => {
         <button
           className="text-white bg-[#4aa2f2] p-3 rounded-md mt-6 hover:bg-[#3a8ccf] transition duration-200"
           type="submit"
-          onClick={() => onLogIn}
         >
           Log in
         </button>
