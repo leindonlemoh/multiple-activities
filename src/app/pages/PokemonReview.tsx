@@ -1,10 +1,12 @@
-import React from 'react'
-import PreviewReview from '../components/PreviewReview'
+import React from "react";
+import PreviewReview from "../components/PreviewReview";
 
-const PokemonReview = () => {
+const PokemonReview = ({ AddPokemon }: { AddPokemon: () => void }) => {
   return (
-    <div><PreviewReview/></div>
-  )
-}
+    <div>
+      <PreviewReview item={""} />
+    </div>
+  );
+};
 
-export default PokemonReview
+export default PokemonReview;

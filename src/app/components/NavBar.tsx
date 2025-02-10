@@ -1,5 +1,7 @@
 import React from 'react'
 import { useRouter } from 'next/navigation';
+import { logout } from '@/lib/auth-actions';
+import Swal from 'sweetalert2';
 
 const NavBar = ({
     activeTab,setActiveTab}
@@ -10,6 +12,23 @@ const NavBar = ({
 
     const router = useRouter();
     const tabs = ['To-Do','Google-Drive','Food-Review','Pokemon-Review','Markdown']
+
+    const onLogout = async()=>{
+        const response = await logout()
+
+        if(response?.status == 200){
+            Swal.fire({
+                title: 'Logged Out',
+                text: response.message,
+                icon: 'success',
+                 showConfirmButton: false,
+  timer: 1500  
+            }).then(()=>{
+                router.push('/')
+            })
+        }
+    }
+
   return (
  <div className='
 
@@ -41,7 +60,7 @@ const NavBar = ({
                 </li>
             ))}
                     
-               
+               <li><button onClick={onLogout}>Logout</button></li>
             </ol>
         </div>
     </div>
