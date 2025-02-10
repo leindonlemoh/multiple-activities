@@ -6,7 +6,7 @@ import FoodReview from "../pages/FoodReview";
 import PokemonReview from "../pages/PokemonReview";
 import Markdown from "../pages/Markdown";
 import NavBar from "../components/NavBar";
-import AddFood from "../components/AddFood";
+import AddItem from "../components/AddItem";
 import AddPokemon from "../components/AddPokemon";
 import { useRouter, useSearchParams } from "next/navigation";
 import { getUser } from "@/lib/getUser";
@@ -34,9 +34,9 @@ const modalContent = ({
 }) => {
   switch (type) {
     case "AddFood":
-      return <AddFood onClose={onClose} />;
-    case "UpdateEmployee":
-      return <AddPokemon onClose={onClose} />;
+      return <AddItem onClose={onClose} from={"food"} />;
+    case "AddPokemon":
+      return <AddItem onClose={onClose} from={"pokemon"} />;
     case "AddReview":
       return <Reviews onClose={onClose} selectedContent={selectedContent} />;
   }
@@ -58,10 +58,15 @@ const page = () => {
     from: "",
   });
 
-  const handleModalOpen = async (type: string, selectedContent?: any) => {
+  const handleModalOpen = async (
+    type: string,
+    selectedContent?: any,
+    from?: string
+  ) => {
     setModalStatus({
       isOpen: true,
       type: type,
+      from: from,
       selectedContent: selectedContent || "",
     });
 
@@ -112,13 +117,16 @@ const page = () => {
       case "Food-Review":
         return (
           <FoodReview
-            AddFood={() => handleModalOpen("AddFood")}
+            AddItem={() => handleModalOpen("AddFood")}
             AddReview={handleModalOpen}
           />
         );
       case "Pokemon-Review":
         return (
-          <PokemonReview AddPokemon={() => handleModalOpen("AddPokemon")} />
+          <PokemonReview
+            AddItem={() => handleModalOpen("AddPokemon")}
+            AddReview={handleModalOpen}
+          />
         );
       case "Markdown":
         return <Markdown />;

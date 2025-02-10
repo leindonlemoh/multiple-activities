@@ -1,18 +1,46 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import Image from "next/image";
+import { getUser } from "@/lib/getUser";
 
 const PreviewReview = ({
   item,
   AddReview,
+  onDelete,
 }: {
   item: any;
   AddReview: (type: string, selectedContent: any) => void;
+  onDelete: (id: number) => void;
 }) => {
+  const [user, setUser] = useState<string | undefined>("");
+
   const openReviews = (type: string, selectedContent: string) => {
     AddReview(type, selectedContent);
   };
+  useEffect(() => {
+    const fetchUser = async () => {
+      const userData = await getUser();
+      if (userData) {
+        setUser(userData?.id);
+      }
+    };
+
+    fetchUser();
+  }, []);
+
   return (
-    <div className="w-[350px] bg-white rounded-lg shadow-lg overflow-hidden my-1">
+    <div className="w-[350px] bg-white rounded-lg shadow-lg overflow-hidden my-1 relative">
+      {user == item?.uploaded_by && (
+        <button
+          className="absolute w-[40px] h-[40px] top-2 right-2 bg-red-500 text-white px-2 py-1 rounded-full hover:bg-red-600 text-3xl"
+          type="button"
+          onClick={() => {
+            onDelete(item?.id);
+          }}
+        >
+          &times;
+        </button>
+      )}
+
       <div className="p-4">
         <h2 className="text-xl font-semibold text-gray-800">{item?.title}</h2>
         <div className="flex items-center mt-2">
@@ -23,7 +51,6 @@ const PreviewReview = ({
         </div>
       </div>
 
-      {/* Image Section */}
       <div className="h-64">
         {item?.image_urls.length === 1 ? (
           <div className="w-full h-full relative">
@@ -37,7 +64,6 @@ const PreviewReview = ({
           </div>
         ) : (
           <div className="bg-white rounded-lg shadow-lg overflow-hidden flex h-full">
-            {/* First Image (Left Side) */}
             <div className="w-1/2 relative h-full">
               {item?.image_urls.length > 0 && (
                 <Image
@@ -50,7 +76,6 @@ const PreviewReview = ({
               )}
             </div>
 
-            {/* Other Images (Right Side) */}
             <div className="w-1/2 p-4 grid grid-cols-2 gap-4 h-full">
               {item?.image_urls.slice(1).map((url: string, index: number) => (
                 <div key={index} className="relative w-full h-32">
@@ -68,7 +93,6 @@ const PreviewReview = ({
         )}
       </div>
 
-      {/* Card Footer with Button */}
       <div className="p-4">
         <button
           className="w-full bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600"

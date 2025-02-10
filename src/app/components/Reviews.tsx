@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { inputChange } from "@/lib/onChange";
 import { getUser } from "@/lib/getUser";
-import { addReview } from "@/lib/food-reviews";
+import { addReview } from "@/lib/item-reviews";
 import Swal from "sweetalert2";
 const Reviews = ({
   onClose,

@@ -9,19 +9,20 @@ import React, {
 import { convertBlobUrlToFile } from "@/lib/convertBlobUrlToFile";
 import { uploadImage } from "@/utils/supabase/storage/client";
 import { inputChange } from "@/lib/onChange";
-import { addFood } from "@/lib/food-reviews";
+import { addReviewItem } from "@/lib/item-reviews";
+import { mutate } from "swr";
 import Swal from "sweetalert2";
 
-const AddFood = ({ onClose }: { onClose: () => void }) => {
+const AddItem = ({ onClose, from }: { onClose: () => void; from: string }) => {
   const imageRef = useRef<HTMLInputElement>(null);
   const [imageUrls, setImageUrls] = useState<string[]>([]);
   const [isPending, startTransition] = useTransition();
   const [foodData, setFoodData] = useState({
     title: "",
-    page: "food_review",
+    page: from == "food" ? "food_review" : "pokemon_review",
     image_urls: [] as string[],
   });
-
+  console.log(from, "from");
   const imageChange = (e: ChangeEvent<HTMLInputElement>) => {
     if (e.target.files) {
       const filesArray = Array.from(e.target.files);
@@ -52,12 +53,7 @@ const AddFood = ({ onClose }: { onClose: () => void }) => {
     try {
       const uploadedImageUrls = await onUploadImage();
 
-      setFoodData((prevState) => ({
-        ...prevState,
-        image_urls: uploadedImageUrls,
-      }));
-
-      const response = await addFood({
+      const response = await addReviewItem({
         title: foodData.title,
         page: foodData.page,
         image_urls: uploadedImageUrls,
@@ -67,12 +63,20 @@ const AddFood = ({ onClose }: { onClose: () => void }) => {
         Swal.fire({
           position: "center",
           icon: "success",
-          title: "New Note has been added",
+          title: `New ${from} has been added`,
           showConfirmButton: false,
           timer: 1500,
-        }).then(() => {
-          onClose();
-        });
+        })
+          .then(() => {
+            onClose();
+          })
+          .then(() => {
+            if (from == "food") {
+              mutate("food_reviews");
+            } else {
+              mutate("pokemon_reviews");
+            }
+          });
       } else {
         Swal.fire({
           position: "center",
@@ -102,13 +106,13 @@ const AddFood = ({ onClose }: { onClose: () => void }) => {
           htmlFor="name"
           className="block text-sm font-medium text-gray-700"
         >
-          Food Name
+          {from == "food" ? "Food Name" : "Pokemon Name"}
         </label>
         <input
           name="title"
           type="text"
           required
-          onChange={(e) => inputChange(e, setFoodData)} // Update food name state
+          onChange={(e) => inputChange(e, setFoodData)}
           placeholder="Enter Food Name"
           className="mt-2 block w-full p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500"
         />
@@ -158,4 +162,4 @@ const AddFood = ({ onClose }: { onClose: () => void }) => {
   );
 };
 
-export default AddFood;
+export default AddItem;
