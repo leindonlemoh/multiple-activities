@@ -1,5 +1,5 @@
 "use client";
-import React, { useState, ChangeEvent } from "react";
+import React, { useState, ChangeEvent, FormEvent } from "react";
 import { signup } from "@/lib/auth-actions";
 import Swal from "sweetalert2";
 import { useRouter } from "next/navigation";
@@ -13,7 +13,7 @@ const Register = () => {
   });
   const router = useRouter();
 
-  const onRegister = async (e: ChangeEvent) => {
+  const onRegister = async (e: FormEvent) => {
     e.preventDefault();
 
     const response = await signup(userInfo);
@@ -46,7 +46,10 @@ const Register = () => {
   return (
     <div className=" pt-5 rounded-lg ">
       <h2 className="w-full text-[#3b5998] text-3xl text-center">Register</h2>
-      <form className="bg-[#17114b] text-[#f7f7f7] flex flex-col p-10 gap-6 rounded-lg shadow-lg ">
+      <form
+        className="bg-[#17114b] text-[#f7f7f7] flex flex-col p-10 gap-6 rounded-lg shadow-lg "
+        onSubmit={onRegister}
+      >
         <label htmlFor="firstName" className="text-lg font-medium">
           First Name:
         </label>
@@ -98,7 +101,6 @@ const Register = () => {
         <button
           className="text-white bg-[#4aa2f2] p-3 rounded-md mt-6 hover:bg-[#3a8ccf] transition duration-200"
           type="submit"
-          onClick={() => onRegister}
         >
           Register
         </button>
