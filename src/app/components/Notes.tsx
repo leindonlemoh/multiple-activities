@@ -12,7 +12,6 @@ const Notes = ({
   index: number;
   fetch: () => void;
 }) => {
-  console.log(notes);
   const date = new Date(notes?.expiration_date);
   const expiration_date = date.toLocaleDateString("en-GB");
 
