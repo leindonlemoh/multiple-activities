@@ -6,10 +6,14 @@ const PreviewReview = ({
   item,
   AddReview,
   onDelete,
+  PreviewUpdate,
+  from,
 }: {
   item: any;
   AddReview: (type: string, selectedContent: any) => void;
   onDelete: (id: number) => void;
+  PreviewUpdate: (type: string, selectedContent: any) => void;
+  from: string;
 }) => {
   const [user, setUser] = useState<string | undefined>("");
 
@@ -26,9 +30,12 @@ const PreviewReview = ({
 
     fetchUser();
   }, []);
-
+  const onEdit = (type: string, selectedContent: string) => {
+    console.log(selectedContent);
+    PreviewUpdate(type, selectedContent);
+  };
   return (
-    <div className="w-[350px] bg-white rounded-lg shadow-lg overflow-hidden my-1 relative">
+    <section className="w-[350px] bg-white rounded-lg shadow-lg overflow-hidden my-1 relative">
       {user == item?.uploaded_by && (
         <button
           className="absolute w-[40px] h-[40px] top-2 right-2 bg-red-500 text-white px-2 py-1 rounded-full hover:bg-red-600 text-3xl"
@@ -43,15 +50,13 @@ const PreviewReview = ({
 
       <div className="p-4">
         <h2 className="text-xl font-semibold text-gray-800">{item?.title}</h2>
-        <div className="flex items-center mt-2">
-          <span className="text-yellow-500 text-sm">{"Reviews"}</span>
-          <span className="text-gray-600 text-sm ml-2">
-            {"number of reviews"}
-          </span>
-        </div>
+        <span className="text-black">
+          {" "}
+          Posted: {new Date(item?.created_at).toLocaleString()}{" "}
+        </span>
       </div>
 
-      <div className="h-64">
+      <div className="h-64 cursor-pointer relative group">
         {item?.image_urls.length === 1 ? (
           <div className="w-full h-full relative">
             <Image
@@ -63,7 +68,7 @@ const PreviewReview = ({
             />
           </div>
         ) : (
-          <div className="bg-white rounded-lg shadow-lg overflow-hidden flex h-full">
+          <div className="bg-white rounded-lg shadow-lg overflow-hidden flex h-full relative group">
             <div className="w-1/2 relative h-full">
               {item?.image_urls.length > 0 && (
                 <Image
@@ -91,6 +96,21 @@ const PreviewReview = ({
             </div>
           </div>
         )}
+        {from == "food" ? (
+          <div
+            className="absolute inset-0 bg-black bg-opacity-40 opacity-0 group-hover:opacity-100 transition-opacity duration-300  flex justify-center items-center"
+            onClick={() => onEdit("PreviewUpdateItemFood", item)}
+          >
+            <p className="text-center text-3xl">Preview</p>
+          </div>
+        ) : (
+          <div
+            className="absolute inset-0 bg-black bg-opacity-40 opacity-0 group-hover:opacity-100 transition-opacity duration-300  flex justify-center items-center"
+            onClick={() => onEdit("PreviewUpdateItemPokemon", item)}
+          >
+            <p className="text-center text-3xl">Preview</p>
+          </div>
+        )}
       </div>
 
       <div className="p-4">
@@ -101,7 +121,7 @@ const PreviewReview = ({
           Read Reviews
         </button>
       </div>
-    </div>
+    </section>
   );
 };
 

@@ -6,14 +6,14 @@ import Loading from "../components/Loading";
 import useSWR, { mutate } from "swr";
 import { deleteItem } from "@/lib/item-reviews";
 import Swal from "sweetalert2";
+
 const fetchFoods = async () => {
   const supabase = createClient();
 
   const { data, error } = await supabase
     .from("photo_review")
     .select("*")
-    .eq("page", "food_review")
-    .order("created_at", { ascending: false });
+    .eq("page", "food_review");
 
   if (error) {
     throw new Error(error.message);
@@ -25,11 +25,15 @@ const fetchFoods = async () => {
 const FoodReview = ({
   AddItem,
   AddReview,
+  PreviewUpdate,
 }: {
   AddItem: () => void;
   AddReview: (type: string, selectedContent: any) => void;
+  PreviewUpdate: (type: string, selectedContent: any) => void;
 }) => {
   const [search, setSearch] = useState("");
+  const [sortedFoods, setSortedFoods] = useState<any[]>([]);
+  const [sortOrder, setSortOrder] = useState("asc");
 
   const debounceTimeout = useRef<NodeJS.Timeout | null>(null);
 
@@ -44,6 +48,8 @@ const FoodReview = ({
   if (error) return <div>Error loading food reviews: {error.message}</div>;
   if (isLoading) return <Loading />;
 
+  const foodData = savedFoods ?? [];
+
   const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const searchTerm = e.target.value;
 
@@ -54,6 +60,18 @@ const FoodReview = ({
     debounceTimeout.current = setTimeout(() => {
       setSearch(searchTerm);
     }, 300);
+  };
+
+  const handleSortByDate = () => {
+    const sorted = [...foodData].sort((a, b) => {
+      const dateA = new Date(a.created_at).getTime();
+      const dateB = new Date(b.created_at).getTime();
+
+      return sortOrder === "asc" ? dateA - dateB : dateB - dateA;
+    });
+
+    setSortedFoods(sorted);
+    setSortOrder(sortOrder === "asc" ? "desc" : "asc");
   };
 
   const onDelete = async (id: number) => {
@@ -81,6 +99,16 @@ const FoodReview = ({
     });
   };
 
+  const filteredFoods = foodData
+    ?.filter((items: any) =>
+      items.title.toLowerCase().includes(search.toLowerCase())
+    )
+    .sort((a, b) => {
+      const dateA = new Date(a.created_at).getTime();
+      const dateB = new Date(b.created_at).getTime();
+      return sortOrder === "asc" ? dateA - dateB : dateB - dateA;
+    });
+
   return (
     <div className="flex flex-col h-[92vh]">
       <div className="w-full flex justify-center py-3 border-b-2">
@@ -93,19 +121,25 @@ const FoodReview = ({
       </div>
       <div className="flex flex-col justify-center">
         <SearchBar handleSearchChange={handleSearchChange} from={"Food"} />
+        <div className="flex justify-end">
+          <button
+            onClick={handleSortByDate}
+            className="bg-blue-500 text-white px-4 py-2 rounded-lg mb-4"
+          >
+            Sort by Date ({sortOrder === "asc" ? "Ascending" : "Descending"})
+          </button>
+        </div>
         <div className="flex flex-row gap-2 m-5">
-          {savedFoods
-            ?.filter((items: any) =>
-              items.title.toLowerCase().includes(search.toLowerCase())
-            )
-            .map((items: any, index: number) => (
-              <PreviewReview
-                item={items}
-                key={index}
-                AddReview={AddReview}
-                onDelete={onDelete}
-              />
-            ))}
+          {filteredFoods?.map((items: any, index: number) => (
+            <PreviewReview
+              item={items}
+              key={index}
+              AddReview={AddReview}
+              onDelete={onDelete}
+              PreviewUpdate={PreviewUpdate}
+              from={"food"}
+            />
+          ))}
         </div>
       </div>
     </div>

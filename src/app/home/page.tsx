@@ -7,11 +7,11 @@ import PokemonReview from "../pages/PokemonReview";
 import Markdown from "../pages/Markdown";
 import NavBar from "../components/NavBar";
 import AddItem from "../components/AddItem";
-import AddPokemon from "../components/AddPokemon";
 import { useRouter, useSearchParams } from "next/navigation";
 import { getUser } from "@/lib/getUser";
 import Modal from "../components/Modal";
 import Reviews from "../components/Reviews";
+import UpdateUploads from "../components/UpdateUploads";
 
 const modalContent = ({
   type,
@@ -39,6 +39,22 @@ const modalContent = ({
       return <AddItem onClose={onClose} from={"pokemon"} />;
     case "AddReview":
       return <Reviews onClose={onClose} selectedContent={selectedContent} />;
+    case "PreviewUpdateItemFood":
+      return (
+        <UpdateUploads
+          onClose={onClose}
+          selectedContent={selectedContent}
+          from={"food"}
+        />
+      );
+    case "PreviewUpdateItemPokemon":
+      return (
+        <UpdateUploads
+          onClose={onClose}
+          selectedContent={selectedContent}
+          from={"pokemon"}
+        />
+      );
   }
 };
 const page = () => {
@@ -117,6 +133,7 @@ const page = () => {
       case "Food-Review":
         return (
           <FoodReview
+            PreviewUpdate={handleModalOpen}
             AddItem={() => handleModalOpen("AddFood")}
             AddReview={handleModalOpen}
           />
@@ -124,6 +141,7 @@ const page = () => {
       case "Pokemon-Review":
         return (
           <PokemonReview
+            PreviewUpdate={handleModalOpen}
             AddItem={() => handleModalOpen("AddPokemon")}
             AddReview={handleModalOpen}
           />

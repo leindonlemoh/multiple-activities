@@ -12,8 +12,7 @@ const fetchPokemon = async () => {
   const { data, error } = await supabase
     .from("photo_review")
     .select("*")
-    .eq("page", "pokemon_review")
-    .order("created_at", { ascending: false });
+    .eq("page", "pokemon_review");
 
   if (error) {
     throw new Error(error.message);
@@ -25,12 +24,16 @@ const fetchPokemon = async () => {
 const PokemonReview = ({
   AddItem,
   AddReview,
+  PreviewUpdate,
 }: {
   AddItem: () => void;
   AddReview: (type: string, selectedContent: any) => void;
+  PreviewUpdate: (type: string, selectedContent: any) => void;
 }) => {
   const [search, setSearch] = useState("");
   const debounceTimeout = useRef<NodeJS.Timeout | null>(null);
+  const [sortedPokemon, setSortedPokemon] = useState<any[]>([]);
+  const [sortOrder, setSortOrder] = useState("asc");
 
   const {
     data: savedPokemons,
@@ -42,6 +45,9 @@ const PokemonReview = ({
 
   if (error) return <div>Error loading food reviews: {error.message}</div>;
   if (isLoading) return <Loading />;
+
+  const pokemonData = savedPokemons ?? [];
+
   const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const searchTerm = e.target.value;
 
@@ -53,6 +59,19 @@ const PokemonReview = ({
       setSearch(searchTerm);
     }, 300);
   };
+
+  const handleSortByDate = () => {
+    const sorted = [...pokemonData].sort((a, b) => {
+      const dateA = new Date(a.created_at).getTime();
+      const dateB = new Date(b.created_at).getTime();
+
+      return sortOrder === "asc" ? dateA - dateB : dateB - dateA;
+    });
+
+    setSortedPokemon(sorted);
+    setSortOrder(sortOrder === "asc" ? "desc" : "asc");
+  };
+
   const onDelete = async (id: number) => {
     Swal.fire({
       title: "Are you sure you want to Delete this item?",
@@ -77,6 +96,17 @@ const PokemonReview = ({
       }
     });
   };
+
+  const filteredPokemon = pokemonData
+    ?.filter((items: any) =>
+      items.title.toLowerCase().includes(search.toLowerCase())
+    )
+    .sort((a, b) => {
+      const dateA = new Date(a.created_at).getTime();
+      const dateB = new Date(b.created_at).getTime();
+      return sortOrder === "asc" ? dateA - dateB : dateB - dateA;
+    });
+
   return (
     <div className="flex flex-col h-[92vh]">
       <div className="w-full flex justify-center py-3 border-b-2">
@@ -89,8 +119,16 @@ const PokemonReview = ({
       </div>
       <div className="flex flex-col justify-center">
         <SearchBar handleSearchChange={handleSearchChange} from={"Pokemon"} />
+        <div className="flex justify-end">
+          <button
+            onClick={handleSortByDate}
+            className="bg-blue-500 text-white px-4 py-2 rounded-lg mb-4"
+          >
+            Sort by Date ({sortOrder === "asc" ? "Ascending" : "Descending"})
+          </button>
+        </div>
         <div className="flex flex-row gap-2 m-5">
-          {savedPokemons
+          {filteredPokemon
             ?.filter((items: any) =>
               items.title.toLowerCase().includes(search.toLowerCase())
             )
@@ -100,6 +138,8 @@ const PokemonReview = ({
                 key={index}
                 AddReview={AddReview}
                 onDelete={onDelete}
+                PreviewUpdate={PreviewUpdate}
+                from={"pokemon"}
               />
             ))}
         </div>
