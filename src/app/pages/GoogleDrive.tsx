@@ -78,27 +78,36 @@ const GoogleDrive = ({
 
   useEffect(() => {
     if (savedData) {
-      // First apply search filter
+      // Apply search filter first
       const filteredData = savedData.filter((items: any) =>
         items.name.toLowerCase().includes(search.toLowerCase())
       );
-      let sorted = [...filteredData];
-      sorted.sort((a, b) => {
+
+      // Sort data by date and name in one pass
+      const sorted = [...filteredData].sort((a, b) => {
+        // First, sort by name (if needed)
+        const nameA = a.name.toLowerCase();
+        const nameB = b.name.toLowerCase();
+        if (nameA < nameB) return sortOrderName === "asc" ? -1 : 1;
+        if (nameA > nameB) return sortOrderName === "asc" ? 1 : -1;
+
+        // If names are equal, sort by date
         const dateA = new Date(a.created_at).getTime();
         const dateB = new Date(b.created_at).getTime();
         return sortOrderDate === "asc" ? dateA - dateB : dateB - dateA;
       });
-      sorted.sort((a, b) => {
-        const nameA = a.name.toLowerCase();
-        const nameB = b.name.toLowerCase();
-        if (nameA < nameB) return sortOrderName === "desc" ? -1 : 1;
-        if (nameA > nameB) return sortOrderName === "asc" ? 1 : -1;
-        return 0;
-      });
 
-      setSortedImages(sorted);
+      // Only set the sorted images if the data has changed
+      setSortedImages((prevSortedImages) => {
+        // Check if the sorted data is different from the previous state
+        if (JSON.stringify(prevSortedImages) !== JSON.stringify(sorted)) {
+          return sorted;
+        }
+        return prevSortedImages; // Avoid unnecessary state update
+      });
     }
   }, [savedData, sortOrderDate, sortOrderName, search]);
+
   const handleSortByDate = () => {
     setSortOrderDate(sortOrderDate === "asc" ? "desc" : "asc");
   };
@@ -109,7 +118,7 @@ const GoogleDrive = ({
   return (
     <div className="">
       <SearchBar handleSearchChange={handleSearchChange} from={"Photo Name"} />
-      <div className="border-b-2 border-[#03045e] p-1 flex justify-center">
+      <div className="  p-1 flex justify-center">
         <button
           type="button"
           className=" bg-[#03045e] flex items-center justify-center text-center
@@ -138,7 +147,7 @@ const GoogleDrive = ({
           </button>
         </div>
       </div>
-      <section className="h-auto border-2 border-[black] flex flex-row flex-wrap gap-5 justify-center p-3">
+      <section className="h-auto flex flex-row flex-wrap gap-5 justify-center p-3">
         {sortedImages?.map((items: any, index: number) => (
           <div
             className="w-[20%] rounded overflow-hidden shadow-lg bg-white "

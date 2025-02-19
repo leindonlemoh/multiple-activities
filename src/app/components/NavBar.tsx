@@ -109,10 +109,8 @@ const NavBar = ({
           {tabs.map((tab, index) => (
             <li key={index}>
               <button
-                className={`w-auto text-[#80ed99] text-lg p-2
-                sm:w-[120px] sm:text-sm
-                md:text-lg
-                lg:text-xl
+                className={` text-[#80ed99]  p-2
+text-xl
          
 
             ${activeTab == tab ? "border-2 border-[#00b4d8] rounded-xl" : ""}

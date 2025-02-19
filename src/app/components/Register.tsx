@@ -11,14 +11,13 @@ const Register = () => {
     email: "",
     password: "",
   });
+  const [isLoading, setIsLoading] = useState(false);
   const router = useRouter();
 
   const onRegister = async (e: FormEvent) => {
     e.preventDefault();
-
+    setIsLoading(true);
     const response = await signup(userInfo);
-
-    console.log(response);
     if (response?.status === 200) {
       Swal.fire({
         title: "Message Sent!",
@@ -26,12 +25,14 @@ const Register = () => {
         icon: "success",
         confirmButtonText: "OK",
       }).then(() => {
+        setIsLoading(false);
         setUserInfo({
           firstName: "",
           lastName: "",
           email: "",
           password: "",
         });
+        window.location.reload();
       });
     } else {
       Swal.fire({
@@ -99,7 +100,8 @@ const Register = () => {
         />
 
         <button
-          className="text-white bg-[#4aa2f2] p-3 rounded-md mt-6 hover:bg-[#3a8ccf] transition duration-200"
+          className={`text-white bg-[#4aa2f2] p-3 rounded-md mt-6 hover:bg-[#3a8ccf] transition duration-200`}
+          disabled={isLoading}
           type="submit"
         >
           Register

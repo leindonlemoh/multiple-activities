@@ -82,12 +82,13 @@ type Review = {
 };
 // add review on the Item
 export async function addReview(formData: Review) {
+  console.log(formData);
   const supabase = await createClient();
 
   const {
     data: { user },
   } = await supabase.auth.getUser();
-
+  console.log(user, " user");
   if (!user) {
     console.error("User is not authenticated in add Review server action");
     return { message: "User not authenticated" };
@@ -97,6 +98,7 @@ export async function addReview(formData: Review) {
     {
       posted_by: user?.id,
       item_id: formData?.food_id,
+      name: user?.user_metadata?.full_name,
       rate: formData?.rate,
       review: formData?.review,
     },
@@ -110,10 +112,8 @@ export async function addReview(formData: Review) {
   return { status: 200, message: "Success" };
 }
 // update review on the Item
-export async function updateReview(formData: any) {
+export async function updateReview(id: string, review: string) {
   const supabase = await createClient();
-  console.log(formData);
-  const id = formData?.id;
 
   const request = {};
   const {
@@ -129,7 +129,7 @@ export async function updateReview(formData: any) {
   const { data, error } = await supabase
     .from("item_reviews")
     .update({
-      ...request,
+      review: review,
     })
     .match({ id: id, posted_by: user.id });
 

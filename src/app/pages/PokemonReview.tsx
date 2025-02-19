@@ -84,27 +84,36 @@ const PokemonReview = ({
   };
   useEffect(() => {
     if (savedData) {
-      // First apply search filter
+      // Apply search filter first
       const filteredData = savedData.filter((items: any) =>
         items.title.toLowerCase().includes(search.toLowerCase())
       );
-      let sorted = [...filteredData];
-      sorted.sort((a, b) => {
+
+      // Sort data by date and name in one pass
+      const sorted = [...filteredData].sort((a, b) => {
+        // First, sort by name (if needed)
+        const nameA = a.title.toLowerCase();
+        const nameB = b.title.toLowerCase();
+        if (nameA < nameB) return sortOrderName === "asc" ? -1 : 1;
+        if (nameA > nameB) return sortOrderName === "asc" ? 1 : -1;
+
+        // If names are equal, sort by date
         const dateA = new Date(a.created_at).getTime();
         const dateB = new Date(b.created_at).getTime();
         return sortOrderDate === "asc" ? dateA - dateB : dateB - dateA;
       });
-      sorted.sort((a, b) => {
-        const nameA = a.title.toLowerCase();
-        const nameB = b.title.toLowerCase();
-        if (nameA < nameB) return sortOrderName === "desc" ? -1 : 1;
-        if (nameA > nameB) return sortOrderName === "asc" ? 1 : -1;
-        return 0;
-      });
 
-      setSortedImages(sorted);
+      // Only set the sorted images if the data has changed
+      setSortedImages((prevSortedImages) => {
+        // Check if the sorted data is different from the previous state
+        if (JSON.stringify(prevSortedImages) !== JSON.stringify(sorted)) {
+          return sorted;
+        }
+        return prevSortedImages; // Avoid unnecessary state update
+      });
     }
   }, [savedData, sortOrderDate, sortOrderName, search]);
+
   if (error) return <div>Error loading food reviews: {error.message}</div>;
   if (isLoading) return <Loading />;
 

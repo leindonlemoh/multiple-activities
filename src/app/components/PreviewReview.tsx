@@ -68,8 +68,9 @@ const PreviewReview = ({
               src={item?.image_urls[0]}
               alt="Food"
               layout="fill"
-              objectFit="cover"
+              sizes="(max-width: 600px) 100vw, 50vw"
               className="rounded-t-lg"
+              style={{ objectFit: "cover" }}
             />
           </div>
         ) : (
@@ -80,8 +81,9 @@ const PreviewReview = ({
                   src={item?.image_urls[0]}
                   alt="Food"
                   layout="fill"
-                  objectFit="cover"
+                  sizes="(max-width: 600px) 100vw, 50vw"
                   className="rounded-l-lg"
+                  style={{ objectFit: "cover" }}
                 />
               )}
             </div>
@@ -93,8 +95,9 @@ const PreviewReview = ({
                     src={url}
                     alt={`Food ${index + 1}`}
                     layout="fill"
-                    objectFit="cover"
+                    sizes="(max-width: 600px) 100vw, 50vw"
                     className="rounded-lg"
+                    style={{ objectFit: "cover" }}
                   />
                 </div>
               ))}
