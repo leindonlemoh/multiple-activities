@@ -51,40 +51,42 @@ const AddItem = ({ onClose, from }: { onClose: () => void; from: string }) => {
   };
   const onSubmitNewFood = async () => {
     try {
-      const uploadedImageUrls = await onUploadImage();
+      startTransition(async () => {
+        const uploadedImageUrls = await onUploadImage();
 
-      const response = await addReviewItem({
-        title: foodData.title,
-        page: foodData.page,
-        image_urls: uploadedImageUrls,
-      });
-
-      if (response.status === 200) {
-        Swal.fire({
-          position: "center",
-          icon: "success",
-          title: `New ${from} has been added`,
-          showConfirmButton: false,
-          timer: 1500,
-        })
-          .then(() => {
-            onClose();
-          })
-          .then(() => {
-            if (from == "food") {
-              mutate("food_reviews");
-            } else {
-              mutate("pokemon_reviews");
-            }
-          });
-      } else {
-        Swal.fire({
-          position: "center",
-          icon: "error",
-          title: "Something went wrong",
-          showConfirmButton: true,
+        const response = await addReviewItem({
+          title: foodData.title,
+          page: foodData.page,
+          image_urls: uploadedImageUrls,
         });
-      }
+
+        if (response.status === 200) {
+          Swal.fire({
+            position: "center",
+            icon: "success",
+            title: `New ${from} has been added`,
+            showConfirmButton: false,
+            timer: 1500,
+          })
+            .then(() => {
+              onClose();
+            })
+            .then(() => {
+              if (from == "food") {
+                mutate("food_reviews");
+              } else {
+                mutate("pokemon_reviews");
+              }
+            });
+        } else {
+          Swal.fire({
+            position: "center",
+            icon: "error",
+            title: "Something went wrong",
+            showConfirmButton: true,
+          });
+        }
+      });
     } catch (error) {
       console.error("Error uploading images or submitting food data:", error);
       Swal.fire({

@@ -10,11 +10,11 @@ import AddNotesForm from "../components/AddNotesForm";
 const ToDo = () => {
   const getItems = localStorage.getItem("localNotes");
   const condition = getItems ? JSON.parse(getItems) : [];
-
+  const [isLoading, setIsLoading] = useState(false);
   const [noteList, setNoteList] = useState({
-    note: condition?.note ? condition?.note : "",
-    date: condition?.date ? condition?.date : "",
-    color: condition?.color ? condition?.color : "#e9ff70",
+    note: condition?.note || "",
+    date: condition?.date || "",
+    color: condition?.color || "#e9ff70",
   });
 
   const [selectedButton, setSelectedBUtton] = useState("#e9ff70");
@@ -29,13 +29,15 @@ const ToDo = () => {
     const response = await fetchData("notes", { posted_by: user?.id });
     return response;
   };
+
   const {
     data: savedNotes,
     error,
-    isLoading,
+    isLoading: noteLoading,
   } = useSWR("saved_notes", fetchNotes, {
-    refreshInterval: 10000,
+    refreshInterval: 5000,
   });
+
   const onChangeSaved = (e: any) => {
     const { name, value } = e.target;
     setNoteList((prevState: any) => ({
@@ -46,69 +48,77 @@ const ToDo = () => {
 
   useEffect(() => {
     localStorage.setItem("localNotes", JSON.stringify(noteList));
+    console.log(noteList);
   }, [noteList]);
 
   const onNoteSubmit = async (e: any) => {
+    setIsLoading(true);
     e.preventDefault();
-    const response = await addNotes(noteList);
-    if (response.status == 200) {
+    if (noteList?.note === "" || noteList?.date === "") {
       Swal.fire({
-        position: "center",
-        icon: "success",
-        title: "New Note has been added",
-        showConfirmButton: false,
-        timer: 1500,
-      }).then(() => {
-        mutate("saved_notes");
-        setNoteList({
-          note: "",
-          date: "",
-          color: "#e9ff70",
-        });
+        title: "Please Fill Out Text Area and date",
+        text: "You can pick a date by clicking its icon",
+        icon: "info",
+        confirmButtonText: "OK",
       });
+    } else {
+      const response = await addNotes(noteList);
+      if (response.status === 200) {
+        Swal.fire({
+          position: "center",
+          icon: "success",
+          title: "New Note has been added",
+          showConfirmButton: false,
+          timer: 1500,
+        }).then(() => {
+          setIsLoading(false);
+          mutate("saved_notes");
+          setNoteList({
+            note: "",
+            date: "",
+            color: "#e9ff70",
+          });
+        });
+      }
     }
   };
 
   return (
-    <div className="h-[91vh] p-5 flex flex-col ">
+    <div className="h-[91vh] p-5 flex flex-col">
       <div className="h-[50%] border-2 border-b-black text-black relative">
         <AddNotesForm
+          isLoading={isLoading}
           noteList={noteList}
           onChangeSaved={onChangeSaved}
-          condition={condition}
           buttonColors={buttonColors}
           onNoteSubmit={onNoteSubmit}
           selectedButton={selectedButton}
           setSelectedBUtton={setSelectedBUtton}
-          setNoteList={setNoteList}
         />
       </div>
 
-      {isLoading ? (
-        <section className="w-[100%] h-[50vh] flex justify-center items-center ">
+      {noteLoading ? (
+        <section className="w-[100%] h-[50vh] flex justify-center items-center">
           <Loading />
         </section>
       ) : (
-        <section>
-          <div className="h-[80%] p-5 flex flex-row flex-wrap justify-start items-center gap-4">
-            <div className="w-full flex flex-row p-3 justify-start mb-2 gap-5 items-center">
-              <div className="relative flex items-center">
-                <div className="w-8 h-8 bg-[yellow] rotate-45 transform -translate-x-2 -translate-y-2"></div>
-                <p className="text-black ml-2">-undone</p>
-              </div>
-              <div className="relative flex items-center">
-                <div className="w-8 h-8 bg-[blue] rotate-45 transform -translate-x-2 -translate-y-2"></div>
-                <p className="text-black ml-2">-done</p>
-              </div>
+        <section className="h-[80%] p-5 flex flex-row flex-wrap justify-start items-center gap-4">
+          <div className="w-full flex flex-row p-3 justify-start mb-2 gap-5 items-center">
+            <div className="relative flex items-center">
+              <div className="w-8 h-8 bg-[yellow] rotate-45 transform -translate-x-2 -translate-y-2"></div>
+              <p className="text-black ml-2">-undone</p>
             </div>
-
-            {savedNotes?.map((items: any, index: number) => {
-              return (
-                <React.Fragment key={index}>
-                  <Notes notes={items} index={index} />
-                </React.Fragment>
-              );
-            })}
+            <div className="relative flex items-center">
+              <div className="w-8 h-8 bg-[blue] rotate-45 transform -translate-x-2 -translate-y-2"></div>
+              <p className="text-black ml-2">-done</p>
+            </div>
+          </div>
+          <div className="flex flex-row flex-wrap border-2 border-black gap-5 p-5">
+            {savedNotes?.map((items: any, index: number) => (
+              <React.Fragment key={index}>
+                <Notes notes={items} index={index} />
+              </React.Fragment>
+            ))}
           </div>
         </section>
       )}

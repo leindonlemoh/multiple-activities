@@ -162,7 +162,7 @@ const UpdateGDrive = ({
           <div>
             <button
               type="button"
-              className="bg-[#03045e] p-2 rounded-lg"
+              className="bg-[#03045e] p-2 rounded-lg text-white"
               onClick={() => setIsUpdating(true)}
             >
               Update Image
@@ -228,17 +228,17 @@ const UpdateGDrive = ({
               {imageUrls != "" ? (
                 <button
                   onClick={onUpdatePhoto}
-                  className="bg-slate-600 py-2 w-40 rounded-lg"
+                  className="bg-slate-600 py-2 w-40 rounded-lg text-white"
                   disabled={isPending}
                 >
-                  {isPending ? "Uploading . . ." : "Upload Images"}
+                  {isPending ? "Uploading . . ." : "Upload Image"}
                 </button>
               ) : (
                 <></>
               )}
               <button
                 type="button"
-                className="bg-[#e63946] p-2 rounded-lg"
+                className="bg-[#e63946] p-2 rounded-lg text-white"
                 onClick={() => setIsUpdating(false)}
               >
                 Cancel

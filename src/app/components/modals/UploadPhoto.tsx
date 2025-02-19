@@ -72,59 +72,67 @@ const UploadPhoto = ({ onClose }: { onClose: () => void }) => {
 
   // 3. submit - database gdrive
   const onSubmitNewFood = async () => {
-    try {
-      // - initiate waiting - button - disabled
-      startTransition(async () => {
-        // -1: request upload in numb 2 - returns aray of obj name and url
-        const uploadedImageUrls = await onUploadImage();
-        console.log("Uploaded image URLs with filenames:", uploadedImageUrls);
-
-        // -2: for each uploads it will submit in gdrive table
-        const uploadPromises = uploadedImageUrls.map(({ url, name }) => {
-          return addPhotoGDrive({
-            name: name,
-            image_url: url,
-          });
-        });
-
-        // wait all response
-        const responses = await Promise.all(uploadPromises);
-
-        // check all response if 200 returns true or false
-        const allUploaded = responses.every(
-          (response) => response.status === 200
-        );
-        console.log(allUploaded, "allUploaded");
-        if (allUploaded) {
-          Swal.fire({
-            position: "center",
-            icon: "success",
-            title: "All images uploaded successfully",
-            showConfirmButton: false,
-            timer: 1500,
-          }).then(() => {
-            setImageUrls([]);
-            setOriginalFiles([]);
-            mutate("gdrive");
-            onClose();
-          });
-        } else {
-          Swal.fire({
-            position: "center",
-            icon: "error",
-            title: "Failed to upload some images",
-            showConfirmButton: true,
-          });
-        }
-      });
-    } catch (error) {
-      console.error("Error uploading images or submitting food data:", error);
+    if (imageUrls?.length == 0) {
       Swal.fire({
-        position: "center",
-        icon: "error",
-        title: "Failed to upload images or submit food",
-        showConfirmButton: true,
+        title: "Add 1 image to upload",
+        text: "pick an image first",
+        icon: "info",
+        confirmButtonText: "OK",
       });
+    } else {
+      try {
+        // - initiate waiting - button - disabled
+        startTransition(async () => {
+          // -1: request upload in numb 2 - returns aray of obj name and url
+          const uploadedImageUrls = await onUploadImage();
+
+          // -2: for each uploads it will submit in gdrive table
+          const uploadPromises = uploadedImageUrls.map(({ url, name }) => {
+            return addPhotoGDrive({
+              name: name,
+              image_url: url,
+            });
+          });
+
+          // wait all response
+          const responses = await Promise.all(uploadPromises);
+
+          // check all response if 200 returns true or false
+          const allUploaded = responses.every(
+            (response) => response.status === 200
+          );
+          console.log(allUploaded, "allUploaded");
+          if (allUploaded) {
+            Swal.fire({
+              position: "center",
+              icon: "success",
+              title: "All images uploaded successfully",
+              showConfirmButton: false,
+              timer: 1500,
+            }).then(() => {
+              setImageUrls([]);
+              setOriginalFiles([]);
+              mutate("gdrive");
+              onClose();
+            });
+          } else {
+            Swal.fire({
+              position: "center",
+              icon: "error",
+              title: "Failed to upload some images",
+              showConfirmButton: true,
+            });
+          }
+        });
+      } catch (error) {
+        console.error("Error uploading images or submitting food data:", error);
+        Swal.fire({
+          position: "center",
+          icon: "error",
+          title: "Failed to upload images or submit food",
+          showConfirmButton: true,
+        });
+      }
     }
   };
 
@@ -195,7 +203,7 @@ const UploadPhoto = ({ onClose }: { onClose: () => void }) => {
         </button>
         <button
           onClick={onSubmitNewFood}
-          className="bg-slate-600 py-2 w-40 rounded-lg"
+          className="bg-slate-600 py-2 w-40 rounded-lg text-white"
           disabled={isPending}
         >
           {isPending ? "Uploading . . ." : "Upload Images"}

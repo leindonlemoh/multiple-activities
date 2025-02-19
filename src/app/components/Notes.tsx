@@ -32,30 +32,19 @@ const Notes = ({ notes, index }: { notes: any; index: number }) => {
 
   const onDelete = async (e: any, id: number) => {
     e.preventDefault();
-    Swal.fire({
-      title: "Are you sure?",
-      text: "You won't be able to revert this!",
-      icon: "warning",
-      showCancelButton: true,
-      confirmButtonColor: "#3085d6",
-      cancelButtonColor: "#d33",
-      confirmButtonText: "Yes, delete it!",
-    }).then(async (result) => {
-      if (result.isConfirmed) {
-        const response = await deleteData("notes", id);
-        if (response?.status == 200) {
-          Swal.fire({
-            position: "center",
-            icon: "success",
-            title: "Your note has been deleted",
-            showConfirmButton: false,
-            timer: 1500,
-          }).then(() => {
-            mutate("saved_notes");
-          });
-        }
-      }
-    });
+    const response = await deleteData("notes", id);
+
+    if (response?.status == 200) {
+      Swal.fire({
+        position: "center",
+        icon: "success",
+        title: "Your note has been deleted",
+        showConfirmButton: false,
+        timer: 1500,
+      }).then(() => {
+        mutate("saved_notes");
+      });
+    }
   };
 
   const onMarkDone = async (e: any) => {

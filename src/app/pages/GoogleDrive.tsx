@@ -84,27 +84,24 @@ const GoogleDrive = ({
       );
 
       // Sort data by date and name in one pass
-      const sorted = [...filteredData].sort((a, b) => {
-        // First, sort by name (if needed)
-        const nameA = a.name.toLowerCase();
-        const nameB = b.name.toLowerCase();
-        if (nameA < nameB) return sortOrderName === "asc" ? -1 : 1;
-        if (nameA > nameB) return sortOrderName === "asc" ? 1 : -1;
+      let sorted = [...filteredData];
 
-        // If names are equal, sort by date
+      // Apply date sorting
+      sorted.sort((a, b) => {
         const dateA = new Date(a.created_at).getTime();
         const dateB = new Date(b.created_at).getTime();
         return sortOrderDate === "asc" ? dateA - dateB : dateB - dateA;
       });
 
-      // Only set the sorted images if the data has changed
-      setSortedImages((prevSortedImages) => {
-        // Check if the sorted data is different from the previous state
-        if (JSON.stringify(prevSortedImages) !== JSON.stringify(sorted)) {
-          return sorted;
-        }
-        return prevSortedImages; // Avoid unnecessary state update
+      sorted.sort((a, b) => {
+        const nameA = a.name.toLowerCase();
+        const nameB = b.name.toLowerCase();
+        if (nameA < nameB) return sortOrderName === "asc" ? -1 : 1;
+        if (nameA > nameB) return sortOrderName === "desc" ? 1 : -1;
+        return 0;
       });
+
+      setSortedImages(sorted);
     }
   }, [savedData, sortOrderDate, sortOrderName, search]);
 

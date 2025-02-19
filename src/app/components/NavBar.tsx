@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import { useRouter } from "next/navigation";
 import { logout } from "@/lib/auth-actions";
 import Swal from "sweetalert2";
@@ -11,6 +11,7 @@ const NavBar = ({
   activeTab: string;
   setActiveTab: (res: string) => void;
 }) => {
+  const [isLoading, setIsLoading] = useState(false);
   const router = useRouter();
   const tabs = [
     "To-Do",
@@ -22,6 +23,7 @@ const NavBar = ({
   ];
 
   const onLogout = async () => {
+    setIsLoading(true);
     const response = await logout();
 
     if (response?.status == 200) {
@@ -32,6 +34,7 @@ const NavBar = ({
         showConfirmButton: false,
         timer: 1500,
       }).then(() => {
+        setIsLoading(false);
         router.push("/");
       });
     }
@@ -52,8 +55,6 @@ const NavBar = ({
       confirmButtonText: "Yes, delete it!",
     }).then(async (result) => {
       if (result.isConfirmed) {
-        console.log(user?.id);
-
         const response = await deleteUser(user?.id);
         if (response?.status == 200) {
           Swal.fire({
@@ -125,7 +126,9 @@ text-xl
           ))}
 
           <li>
-            <button onClick={onLogout}>Logout</button>
+            <button onClick={onLogout}>
+              {isLoading ? "Processing" : "Logout"}
+            </button>
           </li>
         </ol>
       </div>

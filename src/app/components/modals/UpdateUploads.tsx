@@ -62,44 +62,46 @@ const UpdateUploads = ({
 
   const onUpdateItem = async () => {
     try {
-      const uploadedImageUrls =
-        imageUrls.length > 0 ? await onUploadImage() : [];
+      startTransition(async () => {
+        const uploadedImageUrls =
+          imageUrls.length > 0 ? await onUploadImage() : [];
 
-      const updatedImageUrls = [
-        ...foodData.image_urls.filter(
-          (url: string) => !url.startsWith("blob:")
-        ),
-        ...uploadedImageUrls.filter(
-          (url) => !foodData.image_urls.includes(url)
-        ),
-      ];
+        const updatedImageUrls = [
+          ...foodData.image_urls.filter(
+            (url: string) => !url.startsWith("blob:")
+          ),
+          ...uploadedImageUrls.filter(
+            (url) => !foodData.image_urls.includes(url)
+          ),
+        ];
 
-      const response = await updateItem({
-        id: selectedContent?.id,
-        title: foodData.title,
-        page: foodData.page,
-        image_urls: updatedImageUrls,
+        const response = await updateItem({
+          id: selectedContent?.id,
+          title: foodData.title,
+          page: foodData.page,
+          image_urls: updatedImageUrls,
+        });
+
+        if (response.status === 200) {
+          Swal.fire({
+            position: "center",
+            icon: "success",
+            title: `Item updated successfully`,
+            showConfirmButton: false,
+            timer: 1500,
+          }).then(() => {
+            onClose();
+            mutate(toMutate);
+          });
+        } else {
+          Swal.fire({
+            position: "center",
+            icon: "error",
+            title: "Something went wrong",
+            showConfirmButton: true,
+          });
+        }
       });
-
-      if (response.status === 200) {
-        Swal.fire({
-          position: "center",
-          icon: "success",
-          title: `Item updated successfully`,
-          showConfirmButton: false,
-          timer: 1500,
-        }).then(() => {
-          onClose();
-          mutate(toMutate);
-        });
-      } else {
-        Swal.fire({
-          position: "center",
-          icon: "error",
-          title: "Something went wrong",
-          showConfirmButton: true,
-        });
-      }
     } catch (error) {
       console.error("Error updating item:", error);
       Swal.fire({
@@ -202,7 +204,7 @@ const UpdateUploads = ({
         </button>
         <button
           onClick={onUpdateItem}
-          className="bg-slate-600 py-2 w-40 rounded-lg"
+          className="bg-slate-600 py-2 w-40 rounded-lg text-white"
           disabled={isPending}
         >
           {isPending ? "Updating . . ." : "Update Item"}

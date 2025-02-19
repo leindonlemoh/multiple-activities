@@ -11,9 +11,11 @@ const Login = () => {
     email: "",
     password: "",
   });
+  const [isLoading, setIsLoading] = useState(false);
 
   const onLogIn = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
+    setIsLoading(true);
     const response = await login(credentials);
 
     if (response?.status == 200) {
@@ -23,10 +25,11 @@ const Login = () => {
         showConfirmButton: false,
         timer: 1500,
       }).then(() => {
+        setIsLoading(false);
         router.push("/home?tab=To-Do");
       });
     } else {
-      alert("ssss");
+      alert(response?.message);
     }
   };
   return (
@@ -61,8 +64,9 @@ const Login = () => {
         <button
           className="text-white bg-[#4aa2f2] p-3 rounded-md mt-6 hover:bg-[#3a8ccf] transition duration-200"
           type="submit"
+          disabled={isLoading}
         >
-          Log in
+          {isLoading ? "Processing" : "Log in"}
         </button>
       </form>
     </div>
