@@ -52,7 +52,12 @@ const PreviewReview = ({
         <h2 className="text-xl font-semibold text-gray-800">{item?.title}</h2>
         <span className="text-black">
           {" "}
-          Posted: {new Date(item?.created_at).toLocaleString()}{" "}
+          Posted:{" "}
+          {new Date(item?.created_at).toLocaleDateString("en-US", {
+            year: "numeric",
+            month: "2-digit",
+            day: "2-digit",
+          })}
         </span>
       </div>
 
@@ -101,14 +106,14 @@ const PreviewReview = ({
             className="absolute inset-0 bg-black bg-opacity-40 opacity-0 group-hover:opacity-100 transition-opacity duration-300  flex justify-center items-center"
             onClick={() => onEdit("PreviewUpdateItemFood", item)}
           >
-            <p className="text-center text-3xl">Preview</p>
+            <p className="text-center text-3xl text-white">Preview</p>
           </div>
         ) : (
           <div
             className="absolute inset-0 bg-black bg-opacity-40 opacity-0 group-hover:opacity-100 transition-opacity duration-300  flex justify-center items-center"
             onClick={() => onEdit("PreviewUpdateItemPokemon", item)}
           >
-            <p className="text-center text-3xl">Preview</p>
+            <p className="text-center text-3xl text-white">Preview</p>
           </div>
         )}
       </div>

@@ -1,10 +1,11 @@
 import React, { useEffect, useState } from "react";
 import useSWR from "swr";
 import { createClient } from "@/utils/supabase/client";
-import { deleteReview, updateReview } from "@/lib/item-reviews";
+import { updateReview } from "@/lib/item-reviews";
 import Swal from "sweetalert2";
 import { mutate } from "swr";
-
+import { deleteData } from "@/utils/deleteDatas";
+import Loading from "../Loading";
 const ReviewList = ({
   itemId,
   from,
@@ -37,33 +38,43 @@ const ReviewList = ({
   } = useSWR("reviews", fetchReviews, {
     refreshInterval: 10000,
   });
+  if (isLoading) return <Loading />;
 
   const onDelete = async (e: any, id: number) => {
-    e.preventDefault();
-    const response = await deleteReview(id);
-
-    if (response?.status == 200) {
-      Swal.fire({
-        position: "center",
-        icon: "success",
-        title: "Your note has been deleted",
-        showConfirmButton: false,
-        timer: 1500,
-      }).then(() => {
-        mutate("reviews");
-      });
-    }
+    Swal.fire({
+      title: "Are you sure you want to Delete this review?",
+      text: "You won't be able to revert this!",
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonColor: "#3085d6",
+      cancelButtonColor: "#d33",
+      confirmButtonText: "Yes",
+    }).then(async (result) => {
+      if (result.isConfirmed) {
+        const response = await deleteData("item_reviews", id);
+        if (response?.status == 200) {
+          Swal.fire({
+            title: "Deleted!",
+            text: "Your Review has been deleted.",
+            icon: "success",
+            showConfirmButton: false,
+            timer: 1500,
+          }).then(() => {
+            mutate("reviews");
+          });
+        }
+      }
+    });
   };
 
   const onUpdate = async (e: any) => {
     e.preventDefault();
     const response = await updateReview(savedReviews);
-    console.log(response);
     if (response?.status == 200) {
       Swal.fire({
         position: "center",
         icon: "success",
-        title: "Your note has been updated",
+        title: "Your Review has been updated",
         showConfirmButton: false,
         timer: 1500,
       })
@@ -112,7 +123,7 @@ const ReviewList = ({
 
               {userEdit && (
                 <div>
-                  {isEditing ? (
+                  {!isEditing ? (
                     <div className="flex gap-x-2">
                       <button
                         className="text-blue-500 hover:text-red-700"
@@ -172,7 +183,7 @@ const ReviewList = ({
                 defaultValue={items?.review}
                 className="w-full p-2 border border-gray-300 rounded-md text-black"
                 rows={4}
-                disabled={isEditing}
+                disabled={!isEditing}
               />
             ) : (
               <p className="text-gray-700">{items?.review}</p>

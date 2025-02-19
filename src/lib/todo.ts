@@ -73,27 +73,3 @@ export async function updateNote(formData: any) {
 
   return { status: 200, message: "Success" };
 }
-
-export async function deleteNote(id: number) {
-  const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-  if (!user) {
-    console.error("User is not authenticated in delete Message server action");
-    return { message: "User not authenticated" };
-  }
-
-  const { error } = await supabase
-    .from("notes")
-    .delete()
-    .match({ id: id, posted_by: user.id });
-
-  if (error) {
-    console.error("Error deleting message", error);
-    return { status: 500, message: "Error inserting message" };
-  }
-  // revalidatePath('/home')
-
-  return { status: 200, message: "Success" };
-}

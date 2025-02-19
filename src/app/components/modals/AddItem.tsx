@@ -152,7 +152,7 @@ const AddItem = ({ onClose, from }: { onClose: () => void; from: string }) => {
         </button>
         <button
           onClick={onSubmitNewFood}
-          className="bg-slate-600 py-2 w-40 rounded-lg"
+          className="bg-slate-600 py-2 w-40 rounded-lg text-white"
           disabled={isPending}
         >
           {isPending ? "Uploading . . ." : "Upload Images"}

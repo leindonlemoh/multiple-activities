@@ -6,5 +6,6 @@ export async function convertBlobUrlToFile(blobUrl: string) {
   const file = new File([blob], `${fileName}.${mimeType.split("/")[1]}`, {
     type: mimeType,
   });
+  console.log(file);
   return file;
 }

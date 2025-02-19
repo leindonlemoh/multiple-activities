@@ -13,7 +13,6 @@ const Reviews = ({
   onClose: () => void;
   selectedContent: any;
 }) => {
-  console.log(selectedContent);
   const itemId = selectedContent?.id;
   const from = selectedContent?.page;
   const [user, setUser] = useState<string | undefined>("");
@@ -30,7 +29,7 @@ const Reviews = ({
     review: "",
   });
 
-  const handleSubmit = async (e: any) => {
+  const onSubmitReview = async (e: any) => {
     e.preventDefault();
     const response = await addReview(formData);
     if (response.status == 200) {
@@ -42,6 +41,11 @@ const Reviews = ({
         timer: 1500,
       }).then(() => {
         mutate("reviews");
+        setFormData({
+          food_id: itemId,
+          rate: 3,
+          review: "",
+        });
       });
     }
   };
@@ -55,7 +59,7 @@ const Reviews = ({
       <div className="w-full flex flex-col">
         <div className="sticky top-0 bg-slate-400  p-4 rounded-lg shadow-md z-10 mb-4">
           <AddReview
-            onSubmit={handleSubmit}
+            onSubmit={onSubmitReview}
             setFormData={setFormData}
             formData={formData}
           />

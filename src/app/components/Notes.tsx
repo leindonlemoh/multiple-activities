@@ -1,17 +1,10 @@
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import { inputChange } from "@/lib/onChange";
-import { updateNote, deleteNote } from "@/lib/todo";
+import { updateNote } from "@/lib/todo";
 import Swal from "sweetalert2";
-
-const Notes = ({
-  notes,
-  index,
-  fetch,
-}: {
-  notes: any;
-  index: number;
-  fetch: () => void;
-}) => {
+import { mutate } from "swr";
+import { deleteData } from "@/utils/deleteDatas";
+const Notes = ({ notes, index }: { notes: any; index: number }) => {
   const date = new Date(notes?.expiration_date);
   const expiration_date = date.toLocaleDateString("en-GB");
 
@@ -32,27 +25,39 @@ const Notes = ({
         showConfirmButton: false,
         timer: 1500,
       }).then(() => {
-        fetch();
+        mutate("saved_notes");
       });
     }
   };
 
   const onDelete = async (e: any, id: number) => {
     e.preventDefault();
-    const response = await deleteNote(id);
-
-    if (response?.status == 200) {
-      Swal.fire({
-        position: "center",
-        icon: "success",
-        title: "Your note has been deleted",
-        showConfirmButton: false,
-        timer: 1500,
-      }).then(() => {
-        fetch();
-      });
-    }
+    Swal.fire({
+      title: "Are you sure?",
+      text: "You won't be able to revert this!",
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonColor: "#3085d6",
+      cancelButtonColor: "#d33",
+      confirmButtonText: "Yes, delete it!",
+    }).then(async (result) => {
+      if (result.isConfirmed) {
+        const response = await deleteData("notes", id);
+        if (response?.status == 200) {
+          Swal.fire({
+            position: "center",
+            icon: "success",
+            title: "Your note has been deleted",
+            showConfirmButton: false,
+            timer: 1500,
+          }).then(() => {
+            mutate("saved_notes");
+          });
+        }
+      }
+    });
   };
+
   const onMarkDone = async (e: any) => {
     e.preventDefault();
     const updateStatus = {
@@ -68,7 +73,7 @@ const Notes = ({
         showConfirmButton: false,
         timer: 1500,
       }).then(() => {
-        fetch();
+        mutate("saved_notes");
       });
     }
   };
@@ -80,7 +85,7 @@ const Notes = ({
     >
       <div
         className={`absolute top-0 left-0 w-8 h-8 rotate-45 transform -translate-x-2 -translate-y-2`}
-        style={{ background: `${notes?.is_done ? "yellow" : "blue"}` }}
+        style={{ background: `${notes?.is_done ? "blue" : "yellow"}` }}
       ></div>
       <h3 className="font-semibold text-xl text-gray-800 mb-2">Note</h3>
       {isEditing && (
@@ -158,7 +163,3 @@ const Notes = ({
 };
 
 export default Notes;
-// setNoteList((prevNoteList) => ({
-//   ...prevNoteList,
-//   color: `${color}`,
-// }));

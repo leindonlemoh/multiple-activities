@@ -4,14 +4,16 @@ import ToDo from "../pages/ToDo";
 import GoogleDrive from "../pages/GoogleDrive";
 import FoodReview from "../pages/FoodReview";
 import PokemonReview from "../pages/PokemonReview";
-import Markdown from "../pages/Markdown";
+import MarkdownApp from "../pages/Markdown";
 import NavBar from "../components/NavBar";
-import AddItem from "../components/AddItem";
+import AddItem from "../components/modals/AddItem";
 import { useRouter, useSearchParams } from "next/navigation";
 import { getUser } from "@/lib/getUser";
 import Modal from "../components/Modal";
-import Reviews from "../components/Reviews";
-import UpdateUploads from "../components/UpdateUploads";
+import Reviews from "../components/modals/Reviews";
+import UpdateUploads from "../components/modals/UpdateUploads";
+import UploadPhoto from "../components/modals/UploadPhoto";
+import UpdateGDrive from "../components/modals/UpdateGDrive";
 
 const modalContent = ({
   type,
@@ -55,6 +57,12 @@ const modalContent = ({
           from={"pokemon"}
         />
       );
+    case "PreviewUpdateGDrive":
+      return (
+        <UpdateGDrive onClose={onClose} selectedContent={selectedContent} />
+      );
+    case "UploadPhoto":
+      return <UploadPhoto onClose={onClose} />;
   }
 };
 const page = () => {
@@ -129,7 +137,12 @@ const page = () => {
       case "To-Do":
         return <ToDo />;
       case "Google-Drive":
-        return <GoogleDrive />;
+        return (
+          <GoogleDrive
+            UploadPhoto={() => handleModalOpen("UploadPhoto")}
+            UpdatePhoto={handleModalOpen}
+          />
+        );
       case "Food-Review":
         return (
           <FoodReview
@@ -147,7 +160,7 @@ const page = () => {
           />
         );
       case "Markdown":
-        return <Markdown />;
+        return <MarkdownApp />;
       default:
         return <div>Loading.....</div>;
     }

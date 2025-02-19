@@ -6,7 +6,7 @@ type Item = {
   page: string;
   image_urls: string[];
 };
-
+// add new ITEM to Review
 export async function addReviewItem(formData: Item) {
   const supabase = await createClient();
   console.log(formData, "formss");
@@ -35,29 +35,7 @@ export async function addReviewItem(formData: Item) {
 
   return { status: 200, message: "Success" };
 }
-export async function deleteItem(id: number) {
-  const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-  if (!user) {
-    console.error("User is not authenticated in delete Message server action");
-    return { message: "User not authenticated" };
-  }
-
-  const { error } = await supabase
-    .from("photo_review")
-    .delete()
-    .match({ id: id, uploaded_by: user.id });
-
-  if (error) {
-    console.error("Error deleting message", error);
-    return { status: 500, message: "Error inserting message" };
-  }
-  // revalidatePath('/home')
-
-  return { status: 200, message: "Success" };
-}
+// update Item
 export async function updateItem(formData: any) {
   const supabase = await createClient();
   console.log(formData);
@@ -102,7 +80,7 @@ type Review = {
   rate: number;
   review: string;
 };
-
+// add review on the Item
 export async function addReview(formData: Review) {
   const supabase = await createClient();
 
@@ -131,31 +109,7 @@ export async function addReview(formData: Review) {
 
   return { status: 200, message: "Success" };
 }
-
-export async function deleteReview(id: number) {
-  const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-  if (!user) {
-    console.error("User is not authenticated in delete Message server action");
-    return { message: "User not authenticated" };
-  }
-
-  const { error } = await supabase
-    .from("item_reviews")
-    .delete()
-    .match({ id: id, posted_by: user.id });
-
-  if (error) {
-    console.error("Error deleting message", error);
-    return { status: 500, message: "Error inserting message" };
-  }
-  // revalidatePath('/home')
-
-  return { status: 200, message: "Success" };
-}
-
+// update review on the Item
 export async function updateReview(formData: any) {
   const supabase = await createClient();
   console.log(formData);

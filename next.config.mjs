@@ -1,10 +1,16 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   images: {
-    domains: ["zbmzxmtefpwsfevrmdfq.supabase.co"], // Just the hostname
+    remotePatterns: [
+      {
+        protocol: "https",
+        hostname: "zbmzxmtefpwsfevrmdfq.supabase.co",
+        pathname: "/storage/v1/object/public/**",
+      },
+    ],
   },
   eslint: {
-    ignoreDuringBuilds: true, // This disables ESLint during build time
+    ignoreDuringBuilds: true,
   },
   experimental: {
     missingSuspenseWithCSRBailout: false,
