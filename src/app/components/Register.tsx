@@ -104,7 +104,7 @@ const Register = () => {
           disabled={isLoading}
           type="submit"
         >
-          Register
+          {isLoading ? "Processing . . ." : "Register"}
         </button>
       </form>
     </div>
