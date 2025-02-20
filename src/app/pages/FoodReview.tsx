@@ -22,9 +22,7 @@ const FoodReview = ({
   PreviewUpdate: (type: string, selectedContent: any) => void;
 }) => {
   const [sortedFoods, setSortedFoods] = useState<any[]>([]);
-  const [sortByDate, setSortByDate] = useState<"asc" | "desc">("asc");
-  const [sortByName, setSortByName] = useState<"asc" | "desc">("asc");
-
+  const [selectedSort, setSelectedSort] = useState("A-Z");
   const {
     data: savedFoods,
     error,
@@ -38,25 +36,28 @@ const FoodReview = ({
     if (savedFoods) {
       let sorted = [...savedFoods];
 
-      // Apply date sorting
-      sorted.sort((a, b) => {
-        const dateA = new Date(a.created_at).getTime();
-        const dateB = new Date(b.created_at).getTime();
-        return sortByDate === "asc" ? dateA - dateB : dateB - dateA;
-      });
-
-      // Apply name sorting
-      sorted.sort((a, b) => {
-        const nameA = a.title.toLowerCase();
-        const nameB = b.title.toLowerCase();
-        if (nameA < nameB) return sortByName === "asc" ? -1 : 1;
-        if (nameA > nameB) return sortByName === "desc" ? 1 : -1;
-        return 0;
-      });
-
+      if (selectedSort === "A-Z") {
+        // Sorting by name (A-Z)
+        sorted.sort((a, b) => a.title.localeCompare(b.title));
+      } else if (selectedSort === "Z-A") {
+        // Sorting by name (Z-A)
+        sorted.sort((a, b) => b.title.localeCompare(a.title));
+      } else if (selectedSort === "N-O") {
+        // Sorting by date (Newest - Oldest)
+        sorted.sort(
+          (a, b) =>
+            new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
+        );
+      } else if (selectedSort === "O-N") {
+        // Sorting by date (Oldest - Newest)
+        sorted.sort(
+          (a, b) =>
+            new Date(a.created_at).getTime() - new Date(b.created_at).getTime()
+        );
+      }
       setSortedFoods(sorted);
     }
-  }, [savedFoods, sortByDate, sortByName]);
+  }, [savedFoods, selectedSort]);
 
   if (error) return <div>Error loading food reviews: {error.message}</div>;
   if (isLoading) return <Loading />;
@@ -88,14 +89,10 @@ const FoodReview = ({
     });
   };
 
-  const handleSortByDate = () => {
-    setSortByDate(sortByDate === "asc" ? "desc" : "asc");
+  const handleSelectChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    const value = e.target.value;
+    setSelectedSort(value);
   };
-
-  const handleSortByName = () => {
-    setSortByName(sortByName === "asc" ? "desc" : "asc");
-  };
-
   return (
     <div className="flex flex-col h-[92vh]">
       <div className="w-full flex justify-center py-3 border-b-2">
@@ -108,18 +105,26 @@ const FoodReview = ({
       </div>
       <div className="flex flex-col justify-center">
         <div className="flex justify-end gap-x-2 mr-1">
-          <button
-            onClick={handleSortByDate}
-            className="bg-blue-500 text-white px-4 py-2 rounded-lg mb-4"
+          <label className="text-lg font-semibold mr-2">Sort By:</label>
+          <select
+            name="sort"
+            value={selectedSort}
+            onChange={handleSelectChange}
+            className="px-4 py-2 bg-white border border-gray-300 rounded-lg shadow-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
           >
-            Sort by Date ({sortByDate === "asc" ? "Ascending" : "Descending"})
-          </button>
-          <button
-            onClick={handleSortByName}
-            className="bg-green-500 text-white px-4 py-2 rounded-lg mb-4 ml-2"
-          >
-            Sort by Name ({sortByName === "asc" ? "Ascending" : "Descending"})
-          </button>
+            <option value="A-Z" className="text-center">
+              A-Z
+            </option>
+            <option value="Z-A" className="text-center">
+              Z-A
+            </option>
+            <option value="N-O" className="text-center">
+              Date: Newest - Oldest
+            </option>
+            <option value="O-N" className="text-center">
+              Date: Oldest - Newest
+            </option>
+          </select>
         </div>
         <div className="flex flex-row gap-2 m-5">
           {sortedFoods?.map((items: any, index: number) => (

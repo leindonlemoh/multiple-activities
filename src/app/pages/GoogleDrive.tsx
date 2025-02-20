@@ -7,6 +7,7 @@ import { deleteData } from "@/utils/deleteDatas";
 import GDriveUploads from "../components/GDriveUploads";
 import Swal from "sweetalert2";
 import { deleteImage } from "@/utils/supabase/storage/client";
+import { inputChange } from "@/lib/onChange";
 
 const GoogleDrive = ({
   UploadPhoto,
@@ -17,9 +18,8 @@ const GoogleDrive = ({
 }) => {
   const [search, setSearch] = useState("");
   const [sortedImages, setSortedImages] = useState<any[]>([]);
-  const [sortOrderDate, setSortOrderDate] = useState<"asc" | "desc">("asc");
-  const [sortOrderName, setSortOrderName] = useState<"asc" | "desc">("asc"); // Add state for sorting by name
   const debounceTimeout = useRef<NodeJS.Timeout | null>(null);
+  const [selectedSort, setSelectedSort] = useState("A-Z");
 
   const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const searchTerm = e.target.value;
@@ -86,31 +86,39 @@ const GoogleDrive = ({
       // Sort data by date and name in one pass
       let sorted = [...filteredData];
 
-      // Apply date sorting
-      sorted.sort((a, b) => {
-        const dateA = new Date(a.created_at).getTime();
-        const dateB = new Date(b.created_at).getTime();
-        return sortOrderDate === "asc" ? dateA - dateB : dateB - dateA;
-      });
+      if (selectedSort === "A-Z") {
+        // Sorting by name (A-Z)
+        sorted.sort((a, b) => a.name.localeCompare(b.name));
+      } else if (selectedSort === "Z-A") {
+        // Sorting by name (Z-A)
+        sorted.sort((a, b) => b.name.localeCompare(a.name));
+      } else if (selectedSort === "N-O") {
+        // Sorting by date (Newest - Oldest)
+        sorted.sort(
+          (a, b) =>
+            new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
+        );
+      } else if (selectedSort === "O-N") {
+        // Sorting by date (Oldest - Newest)
+        sorted.sort(
+          (a, b) =>
+            new Date(a.created_at).getTime() - new Date(b.created_at).getTime()
+        );
+      }
 
-      sorted.sort((a, b) => {
-        const nameA = a.name.toLowerCase();
-        const nameB = b.name.toLowerCase();
-        if (nameA < nameB) return sortOrderName === "asc" ? -1 : 1;
-        if (nameA > nameB) return sortOrderName === "desc" ? 1 : -1;
-        return 0;
-      });
-
-      setSortedImages(sorted);
+      // Update state only if sorting resulted in a change
+      if (JSON.stringify(sorted) !== JSON.stringify(sortedImages)) {
+        setSortedImages(sorted);
+      }
     }
-  }, [savedData, sortOrderDate, sortOrderName, search]);
+  }, [savedData, selectedSort, search]);
 
-  const handleSortByDate = () => {
-    setSortOrderDate(sortOrderDate === "asc" ? "desc" : "asc");
-  };
-
-  const handleSortByName = () => {
-    setSortOrderName((prev) => (prev === "asc" ? "desc" : "asc"));
+  useEffect(() => {
+    console.log("selectedSort", selectedSort);
+  }, [selectedSort]);
+  const handleSelectChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    const value = e.target.value;
+    setSelectedSort(value);
   };
   return (
     <div className="">
@@ -128,20 +136,41 @@ const GoogleDrive = ({
       </div>
       <div>
         <div className="flex justify-end">
-          <button
+          <label className="text-lg font-semibold mr-2">Sort By:</label>
+          <select
+            name="sort"
+            value={selectedSort}
+            onChange={handleSelectChange}
+            className="px-4 py-2 bg-white border border-gray-300 rounded-lg shadow-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+          >
+            <option value="A-Z" className="text-center">
+              A-Z
+            </option>
+            <option value="Z-A" className="text-center">
+              Z-A
+            </option>
+            <option value="N-O" className="text-center">
+              Date: Newest - Oldest
+            </option>
+            <option value="O-N" className="text-center">
+              Date: Oldest - Newest
+            </option>
+          </select>
+
+          {/* <button
             onClick={handleSortByDate}
             className="bg-blue-500 text-white px-4 py-2 rounded-lg mb-4"
           >
             Sort by Date ({sortOrderDate === "asc" ? "Ascending" : "Descending"}
             )
-          </button>
-          {/* Button for sorting by name */}
-          <button
+          </button> */}
+          {/* /* Button for sorting by name */}
+          {/* <button
             onClick={handleSortByName}
             className="bg-green-500 text-white px-4 py-2 rounded-lg mb-4 ml-2"
           >
             Sort by Name ({sortOrderName === "asc" ? "A-Z" : "Z-A"})
-          </button>
+          </button> */}
         </div>
       </div>
       {

@@ -50,51 +50,60 @@ const AddItem = ({ onClose, from }: { onClose: () => void; from: string }) => {
     return urls;
   };
   const onSubmitNewFood = async () => {
-    try {
-      startTransition(async () => {
-        const uploadedImageUrls = await onUploadImage();
-
-        const response = await addReviewItem({
-          title: foodData.title,
-          page: foodData.page,
-          image_urls: uploadedImageUrls,
-        });
-
-        if (response.status === 200) {
-          Swal.fire({
-            position: "center",
-            icon: "success",
-            title: `New ${from} has been added`,
-            showConfirmButton: false,
-            timer: 1500,
-          })
-            .then(() => {
-              onClose();
-            })
-            .then(() => {
-              if (from == "food") {
-                mutate("food_reviews");
-              } else {
-                mutate("pokemon_reviews");
-              }
-            });
-        } else {
-          Swal.fire({
-            position: "center",
-            icon: "error",
-            title: "Something went wrong",
-            showConfirmButton: true,
-          });
-        }
-      });
-    } catch (error) {
-      console.error("Error uploading images or submitting food data:", error);
+    if (imageUrls?.length == 0 || foodData?.title == "") {
       Swal.fire({
-        position: "center",
-        icon: "error",
-        title: "Failed to upload images or submit food",
-        showConfirmButton: true,
+        title: "Add 1 image and add title to upload",
+        text: "pick an image first and write a name",
+        icon: "info",
+        confirmButtonText: "OK",
       });
+    } else {
+      try {
+        startTransition(async () => {
+          const uploadedImageUrls = await onUploadImage();
+
+          const response = await addReviewItem({
+            title: foodData.title,
+            page: foodData.page,
+            image_urls: uploadedImageUrls,
+          });
+
+          if (response.status === 200) {
+            Swal.fire({
+              position: "center",
+              icon: "success",
+              title: `New ${from} has been added`,
+              showConfirmButton: false,
+              timer: 1500,
+            })
+              .then(() => {
+                onClose();
+              })
+              .then(() => {
+                if (from == "food") {
+                  mutate("food_reviews");
+                } else {
+                  mutate("pokemon_reviews");
+                }
+              });
+          } else {
+            Swal.fire({
+              position: "center",
+              icon: "error",
+              title: "Something went wrong",
+              showConfirmButton: true,
+            });
+          }
+        });
+      } catch (error) {
+        console.error("Error uploading images or submitting food data:", error);
+        Swal.fire({
+          position: "center",
+          icon: "error",
+          title: "Failed to upload images or submit food",
+          showConfirmButton: true,
+        });
+      }
     }
   };
   useEffect(() => {

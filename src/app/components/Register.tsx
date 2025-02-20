@@ -20,7 +20,7 @@ const Register = () => {
     const response = await signup(userInfo);
     if (response?.status === 200) {
       Swal.fire({
-        title: "Message Sent!",
+        title: "Authentication sent to you email",
         text: "Please Check your email",
         icon: "success",
         confirmButtonText: "OK",

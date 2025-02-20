@@ -72,7 +72,6 @@ const MarkdownApp = () => {
     }
   };
 
-  // to check if one data is the current one to be the input state content/value
   useEffect(() => {
     if (isActiveNote !== null) {
       const activeNote = savedNotes?.find(
@@ -85,8 +84,8 @@ const MarkdownApp = () => {
   }, [isActiveNote, savedNotes]);
 
   return (
-    <div className="flex flex-row bg-[#c4c4c4a4] w-[100%] h-[100vh] border-2 ">
-      {/* tabs or titles */}
+    <div className="flex flex-row bg-[#c4c4c4a4] w-[100%] h-[100vh] border-2">
+      {/* title tabs */}
       <div className="p-4 border-2 w-[20%] flex flex-col gap-y-3">
         {isLoading ? (
           <Loading />
@@ -113,11 +112,12 @@ const MarkdownApp = () => {
           </>
         )}
       </div>
+
       {/* text area */}
       <div className="w-[40%]">
         {isActiveNote !== null && savedNotes ? (
-          <div className="w-[100%]  h-[70vh] p-2 flex-col">
-            {savedNotes[isActiveNote]?.content != input && (
+          <div className="w-[100%] h-[70vh] p-2 flex-col">
+            {savedNotes[isActiveNote]?.content !== input && (
               <button
                 className="bg-[#03045e] text-white text-2xl p-3 rounded-lg"
                 onClick={() => onUpdateMarkdown(isActiveNote)}
@@ -129,13 +129,14 @@ const MarkdownApp = () => {
               autoFocus
               value={input}
               onChange={(e) => setInput(e.target.value)}
-              className="border-2 border-black  w-[100%] text-2xl text-black"
+              className="border-2 border-black h-full w-[100%] text-2xl text-black"
             />
           </div>
         ) : (
           <div>Select a note to edit</div>
         )}
       </div>
+
       {/* markdown preview */}
       <div className="p-4 w-[40%]">
         {isActiveNote !== null && savedNotes ? (

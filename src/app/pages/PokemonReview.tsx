@@ -20,8 +20,8 @@ const PokemonReview = ({
 }) => {
   const [search, setSearch] = useState("");
   const [sortedImages, setSortedImages] = useState<any[]>([]);
-  const [sortOrderDate, setSortOrderDate] = useState<"asc" | "desc">("asc");
-  const [sortOrderName, setSortOrderName] = useState<"asc" | "desc">("asc");
+  const [selectedSort, setSelectedSort] = useState("A-Z");
+
   const debounceTimeout = useRef<NodeJS.Timeout | null>(null);
   const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const searchTerm = e.target.value;
@@ -75,40 +75,43 @@ const PokemonReview = ({
     });
   };
 
-  const handleSortByDate = () => {
-    setSortOrderDate(sortOrderDate === "asc" ? "desc" : "asc");
-  };
-
-  const handleSortByName = () => {
-    setSortOrderName(sortOrderName === "asc" ? "desc" : "asc");
-  };
   useEffect(() => {
     if (savedData) {
       // Apply search filter first
       const filteredData = savedData.filter((items: any) =>
         items.title.toLowerCase().includes(search.toLowerCase())
       );
-
-      // Sort data by date and name in one pass
       let sorted = [...filteredData];
-      // Apply date sorting
-      sorted.sort((a, b) => {
-        const dateA = new Date(a.created_at).getTime();
-        const dateB = new Date(b.created_at).getTime();
-        return sortOrderDate === "asc" ? dateA - dateB : dateB - dateA;
-      });
+      if (selectedSort === "A-Z") {
+        // Sorting by name (A-Z)
+        sorted.sort((a, b) => a.title.localeCompare(b.title));
+      } else if (selectedSort === "Z-A") {
+        // Sorting by name (Z-A)
+        sorted.sort((a, b) => b.title.localeCompare(a.title));
+      } else if (selectedSort === "N-O") {
+        // Sorting by date (Newest - Oldest)
+        sorted.sort(
+          (a, b) =>
+            new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
+        );
+      } else if (selectedSort === "O-N") {
+        // Sorting by date (Oldest - Newest)
+        sorted.sort(
+          (a, b) =>
+            new Date(a.created_at).getTime() - new Date(b.created_at).getTime()
+        );
+      }
 
-      sorted.sort((a, b) => {
-        const nameA = a.title.toLowerCase();
-        const nameB = b.title.toLowerCase();
-        if (nameA < nameB) return sortOrderName === "asc" ? -1 : 1;
-        if (nameA > nameB) return sortOrderName === "desc" ? 1 : -1;
-        return 0;
-      });
-      setSortedImages(sorted);
+      // Update state only if sorting resulted in a change
+      if (JSON.stringify(sorted) !== JSON.stringify(sortedImages)) {
+        setSortedImages(sorted);
+      }
     }
-  }, [savedData, sortOrderDate, sortOrderName, search]);
-
+  }, [savedData, selectedSort, search]);
+  const handleSelectChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    const value = e.target.value;
+    setSelectedSort(value);
+  };
   if (error) return <div>Error loading food reviews: {error.message}</div>;
   if (isLoading) return <Loading />;
 
@@ -125,20 +128,26 @@ const PokemonReview = ({
       </div>
       <div className="flex flex-col justify-center">
         <div className="flex justify-end gap-x-3 mr-2">
-          <button
-            onClick={handleSortByDate}
-            className="bg-blue-500 text-white px-4 py-2 rounded-lg mb-4"
+          <label className="text-lg font-semibold mr-2">Sort By:</label>
+          <select
+            name="sort"
+            value={selectedSort}
+            onChange={handleSelectChange}
+            className="px-4 py-2 bg-white border border-gray-300 rounded-lg shadow-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
           >
-            Sort by Date ({sortOrderDate === "asc" ? "Ascending" : "Descending"}
-            )
-          </button>
-          <button
-            onClick={handleSortByName}
-            className="bg-green-500 text-white px-4 py-2 rounded-lg mb-4 ml-2"
-          >
-            Sort by Name ({sortOrderName === "asc" ? "Ascending" : "Descending"}
-            )
-          </button>
+            <option value="A-Z" className="text-center">
+              A-Z
+            </option>
+            <option value="Z-A" className="text-center">
+              Z-A
+            </option>
+            <option value="N-O" className="text-center">
+              Date: Newest - Oldest
+            </option>
+            <option value="O-N" className="text-center">
+              Date: Oldest - Newest
+            </option>
+          </select>
         </div>
         <div className="flex flex-row gap-2 m-5">
           {sortedImages.map((items: any, index: number) => (
