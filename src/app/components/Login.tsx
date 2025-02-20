@@ -29,7 +29,12 @@ const Login = () => {
         router.push("/home?tab=To-Do");
       });
     } else {
-      alert(response?.message);
+      Swal.fire({
+        icon: "error",
+        title: "Please check your Credentials",
+        showConfirmButton: false,
+        timer: 1500,
+      });
     }
   };
   return (
