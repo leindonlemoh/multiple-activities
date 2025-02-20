@@ -34,6 +34,8 @@ const Login = () => {
         title: "Please check your Credentials",
         showConfirmButton: false,
         timer: 1500,
+      }).then(() => {
+        setIsLoading(false);
       });
     }
   };
