@@ -112,6 +112,7 @@ const MarkDownNotes = ({
             type="text"
             name="title"
             className="text-[#03045e] rounded-lg"
+            placeholder="Enter a title"
             value={note?.title}
             onChange={(e) => {
               inputChange(e, setNote);

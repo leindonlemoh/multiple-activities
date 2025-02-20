@@ -3,12 +3,12 @@ import { inputChange } from "@/lib/onChange";
 
 const AddReview = ({
   onSubmit,
-
+  isPending,
   setFormData,
   formData,
 }: {
   onSubmit: (e: any) => void;
-
+  isPending: boolean;
   setFormData: (res: any) => void;
   formData: any;
 }) => {
@@ -80,8 +80,9 @@ const AddReview = ({
           <button
             type="submit"
             className="px-6 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600"
+            disabled={isPending}
           >
-            Submit
+            {isPending ? "Processing" : "Submit"}
           </button>
         </div>
       </form>

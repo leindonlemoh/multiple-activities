@@ -77,32 +77,26 @@ const PokemonReview = ({
 
   useEffect(() => {
     if (savedData) {
-      // Apply search filter first
       const filteredData = savedData.filter((items: any) =>
         items.title.toLowerCase().includes(search.toLowerCase())
       );
       let sorted = [...filteredData];
       if (selectedSort === "A-Z") {
-        // Sorting by name (A-Z)
         sorted.sort((a, b) => a.title.localeCompare(b.title));
       } else if (selectedSort === "Z-A") {
-        // Sorting by name (Z-A)
         sorted.sort((a, b) => b.title.localeCompare(a.title));
       } else if (selectedSort === "N-O") {
-        // Sorting by date (Newest - Oldest)
         sorted.sort(
           (a, b) =>
             new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
         );
       } else if (selectedSort === "O-N") {
-        // Sorting by date (Oldest - Newest)
         sorted.sort(
           (a, b) =>
             new Date(a.created_at).getTime() - new Date(b.created_at).getTime()
         );
       }
 
-      // Update state only if sorting resulted in a change
       if (JSON.stringify(sorted) !== JSON.stringify(sortedImages)) {
         setSortedImages(sorted);
       }

@@ -1,6 +1,5 @@
 import { createClient } from "@/utils/supabase/client";
 
-// General-purpose fetch function that can handle dynamic conditions
 export const fetchData = async (
   from: string,
   conditions: Record<string, any> = {}

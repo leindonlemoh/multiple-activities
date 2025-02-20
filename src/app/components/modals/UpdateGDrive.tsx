@@ -49,8 +49,7 @@ const UpdateGDrive = ({
           url: newImageUrls,
         },
       ];
-
-      //   //   - use later for preview
+      //   - use later for preview
       setImageUrls(newOriginalFiles[0]?.url);
 
       setOriginalFiles((prevFiles) => [...prevFiles, ...newOriginalFiles]);

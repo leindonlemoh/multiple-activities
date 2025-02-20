@@ -1,5 +1,4 @@
-import React, { useState, useEffect } from "react";
-import { inputChange } from "@/lib/onChange";
+import React, { useState, useEffect, useTransition } from "react";
 import { createClient } from "@/utils/supabase/client";
 import { getUser } from "@/lib/getUser";
 import { addReview } from "@/lib/item-reviews";
@@ -7,7 +6,7 @@ import Swal from "sweetalert2";
 import AddReview from "./AddReview";
 import ReviewList from "./ReviewList";
 import useSWR, { mutate } from "swr";
-import { updateReview } from "@/lib/item-reviews";
+
 import { deleteData } from "@/utils/deleteDatas";
 const Reviews = ({
   onClose,
@@ -19,6 +18,7 @@ const Reviews = ({
   const itemId = selectedContent?.id;
   const from = selectedContent?.page;
   const [user, setUser] = useState<any>("");
+  const [isPending, startTransition] = useTransition();
   const [isEditing, setIsEditing] = useState(false);
 
   useEffect(() => {
@@ -55,23 +55,35 @@ const Reviews = ({
   });
 
   const onSubmitReview = async (e: any) => {
-    e.preventDefault();
-    console.log("From", formData);
-    const response = await addReview(formData);
-    if (response.status == 200) {
+    try {
+      startTransition(async () => {
+        e.preventDefault();
+        console.log("From", formData);
+        const response = await addReview(formData);
+        if (response.status == 200) {
+          Swal.fire({
+            position: "center",
+            icon: "success",
+            title: "New Review has been added",
+            showConfirmButton: false,
+            timer: 1500,
+          }).then(() => {
+            mutate("reviews");
+            setFormData({
+              food_id: itemId,
+              rate: 3,
+              review: "",
+            });
+          });
+        }
+      });
+    } catch (error) {
       Swal.fire({
         position: "center",
-        icon: "success",
-        title: "New Review has been added",
+        icon: "error",
+        title: "Something Went wrong",
         showConfirmButton: false,
         timer: 1500,
-      }).then(() => {
-        mutate("reviews");
-        setFormData({
-          food_id: itemId,
-          rate: 3,
-          review: "",
-        });
       });
     }
   };
@@ -114,6 +126,7 @@ const Reviews = ({
             onSubmit={onSubmitReview}
             setFormData={setFormData}
             formData={formData}
+            isPending={isPending}
           />
         </div>
         <div className="space-y-4">

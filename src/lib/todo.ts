@@ -68,7 +68,6 @@ export async function updateNote(formData: any) {
     console.error("Error updating message", error);
     return { status: 500, message: "Error updating message" };
   }
-  // revalidatePath('/home')
 
   return { status: 200, message: "Success" };
 }
