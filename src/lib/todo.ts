@@ -43,7 +43,6 @@ export async function updateNote(formData: any) {
 
   const request = {
     note: formData?.note,
-    expiration_date: formData?.expiration_date,
     is_done: formData?.is_done,
   };
   const {

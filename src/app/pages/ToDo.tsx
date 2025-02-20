@@ -20,24 +20,6 @@ const ToDo = () => {
   const [selectedButton, setSelectedBUtton] = useState("#e9ff70");
   const buttonColors = ["#e9ff70", "#ffd670", "#ff9770", "#ff70a6", "#70d6ff"];
 
-  const fetchNotes = async () => {
-    const supabase = createClient();
-    const {
-      data: { user },
-      error: userError,
-    } = await supabase.auth.getUser();
-    const response = await fetchData("notes", { posted_by: user?.id });
-    return response;
-  };
-
-  const {
-    data: savedNotes,
-    error,
-    isLoading: noteLoading,
-  } = useSWR("saved_notes", fetchNotes, {
-    refreshInterval: 5000,
-  });
-
   const onChangeSaved = (e: any) => {
     const { name, value } = e.target;
     setNoteList((prevState: any) => ({
@@ -52,7 +34,6 @@ const ToDo = () => {
   }, [noteList]);
 
   const onNoteSubmit = async (e: any) => {
-    setIsLoading(true);
     e.preventDefault();
     if (noteList?.note === "" || noteList?.date === "") {
       Swal.fire({
@@ -63,6 +44,7 @@ const ToDo = () => {
       });
     } else {
       const response = await addNotes(noteList);
+      setIsLoading(true);
       if (response.status === 200) {
         Swal.fire({
           position: "center",
@@ -97,31 +79,20 @@ const ToDo = () => {
         />
       </div>
 
-      {noteLoading ? (
-        <section className="w-[100%] h-[50vh] flex justify-center items-center">
-          <Loading />
-        </section>
-      ) : (
-        <section className="h-[80%] p-5 flex flex-row flex-wrap justify-start items-center gap-4">
-          <div className="w-full flex flex-row p-3 justify-start mb-2 gap-5 items-center">
-            <div className="relative flex items-center">
-              <div className="w-8 h-8 bg-[yellow] rotate-45 transform -translate-x-2 -translate-y-2"></div>
-              <p className="text-black ml-2">-undone</p>
-            </div>
-            <div className="relative flex items-center">
-              <div className="w-8 h-8 bg-[blue] rotate-45 transform -translate-x-2 -translate-y-2"></div>
-              <p className="text-black ml-2">-done</p>
-            </div>
+      <section className="h-[80%] w-[100%]  flex-wrap justify-start items-center gap-4">
+        <div className="w-full flex flex-row p-3 justify-start mb-2 gap-5 items-center">
+          <div className="relative flex items-center">
+            <div className="w-8 h-8 bg-[yellow] rotate-45 transform -translate-x-2 -translate-y-2"></div>
+            <p className="text-black ml-2">-undone</p>
           </div>
-          <div className="flex flex-row flex-wrap border-2 border-black gap-5 p-5">
-            {savedNotes?.map((items: any, index: number) => (
-              <React.Fragment key={index}>
-                <Notes notes={items} index={index} />
-              </React.Fragment>
-            ))}
+          <div className="relative flex items-center">
+            <div className="w-8 h-8 bg-[blue] rotate-45 transform -translate-x-2 -translate-y-2"></div>
+            <p className="text-black ml-2">-done</p>
           </div>
-        </section>
-      )}
+        </div>
+
+        <Notes />
+      </section>
     </div>
   );
 };

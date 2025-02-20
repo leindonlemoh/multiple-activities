@@ -144,20 +144,22 @@ const GoogleDrive = ({
           </button>
         </div>
       </div>
-      <section className="h-auto flex flex-row flex-wrap gap-5 justify-center p-3">
-        {sortedImages?.map((items: any, index: number) => (
-          <div
-            className="w-[20%] rounded overflow-hidden shadow-lg bg-white "
-            key={index}
-          >
-            <GDriveUploads
-              items={items}
-              onDelete={onDelete}
-              UpdatePhoto={UpdatePhoto}
-            />
-          </div>
-        ))}
-      </section>
+      {
+        <section className="h-auto flex flex-row flex-wrap gap-5 justify-center p-3">
+          {sortedImages?.map((items: any, index: number) => (
+            <div
+              className="w-[20%] rounded overflow-hidden shadow-lg bg-white "
+              key={index}
+            >
+              <GDriveUploads
+                items={items}
+                onDelete={onDelete}
+                UpdatePhoto={UpdatePhoto}
+              />
+            </div>
+          ))}
+        </section>
+      }
     </div>
   );
 };

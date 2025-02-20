@@ -1,23 +1,52 @@
-import React, { useState } from "react";
-import { inputChange } from "@/lib/onChange";
+import React, { useState, useEffect } from "react";
 import { updateNote } from "@/lib/todo";
 import Swal from "sweetalert2";
-import { mutate } from "swr";
+import { fetchData } from "@/utils/fetchData";
 import { deleteData } from "@/utils/deleteDatas";
-const Notes = ({ notes, index }: { notes: any; index: number }) => {
-  const date = new Date(notes?.expiration_date);
-  const expiration_date = date.toLocaleDateString("en-GB");
+import { createClient } from "@/utils/supabase/client";
+import useSWR, { mutate } from "swr";
 
-  const [isEditing, setIsEditing] = useState(false);
-  const [note, setNote] = useState(notes);
-  const onEdit = (params: boolean) => {
-    setIsEditing(!params);
+const Notes = () => {
+  const fetchNotes = async () => {
+    const supabase = createClient();
+    const {
+      data: { user },
+      error: userError,
+    } = await supabase.auth.getUser();
+    const response = await fetchData("notes", { posted_by: user?.id });
+    return response;
   };
 
-  const onUpdate = async (e: any) => {
-    e.preventDefault();
-    const response = await updateNote(note);
-    if (response?.status == 200) {
+  const {
+    data: savedNotes,
+    error,
+    isLoading: noteLoading,
+  } = useSWR("saved_notes", fetchNotes, {
+    refreshInterval: 5000,
+  });
+
+  const [editingNoteId, setEditingNoteId] = useState<number | null>(null); // Track which note is being edited
+  const [updatedNotes, setUpdatedNotes] = useState(savedNotes || []);
+
+  // Use Effect to sync initial savedNotes to updatedNotes when savedNotes changes
+  useEffect(() => {
+    if (savedNotes) {
+      setUpdatedNotes(savedNotes);
+    }
+  }, [savedNotes]);
+
+  const onEdit = (id: number) => {
+    setEditingNoteId(id); // Set the note to edit
+  };
+
+  const onUpdate = async (id: number, noteContent: string) => {
+    const updatedNote = {
+      id,
+      note: noteContent,
+    };
+
+    const response = await updateNote(updatedNote); // Update the note
+    if (response?.status === 200) {
       Swal.fire({
         position: "center",
         icon: "success",
@@ -27,6 +56,15 @@ const Notes = ({ notes, index }: { notes: any; index: number }) => {
       }).then(() => {
         mutate("saved_notes");
       });
+      setEditingNoteId(null); // Reset editing mode after updating
+    } else {
+      Swal.fire({
+        position: "center",
+        icon: "error",
+        title: "Error on updating",
+        showConfirmButton: false,
+        timer: 1500,
+      });
     }
   };
 
@@ -34,7 +72,7 @@ const Notes = ({ notes, index }: { notes: any; index: number }) => {
     e.preventDefault();
     const response = await deleteData("notes", id);
 
-    if (response?.status == 200) {
+    if (response?.status === 200) {
       Swal.fire({
         position: "center",
         icon: "success",
@@ -47,106 +85,136 @@ const Notes = ({ notes, index }: { notes: any; index: number }) => {
     }
   };
 
-  const onMarkDone = async (e: any) => {
-    e.preventDefault();
+  const handleChange = (
+    e: React.ChangeEvent<HTMLTextAreaElement>,
+    id: number
+  ) => {
+    const updatedNotesList = updatedNotes.map((item) =>
+      item.id === id ? { ...item, note: e.target.value } : item
+    );
+    setUpdatedNotes(updatedNotesList);
+  };
+  const onMarkDone = async (e: any, id: number, is_done: boolean) => {
     const updateStatus = {
-      ...notes,
-      is_done: !notes?.is_done,
+      id: id,
+      is_done: is_done == true ? false : true,
     };
     const response = await updateNote(updateStatus);
     if (response?.status == 200) {
       Swal.fire({
         position: "center",
         icon: "success",
-        title: `You Maked this Note ${notes?.is_done ? "UnDone" : "Done"}`,
+        title: "Your note has been updated",
         showConfirmButton: false,
         timer: 1500,
       }).then(() => {
         mutate("saved_notes");
       });
+    } else {
+      Swal.fire({
+        position: "center",
+        icon: "error",
+        title: "Problem on editing",
+        showConfirmButton: false,
+        timer: 1500,
+      });
     }
   };
-
   return (
-    <div
-      className={`relative p-7 rounded-lg shadow-lg w-[20%] h-60 flex flex-col justify-between`}
-      style={{ backgroundColor: notes?.color }}
-    >
-      <div
-        className={`absolute top-0 left-0 w-8 h-8 rotate-45 transform -translate-x-2 -translate-y-2`}
-        style={{ background: `${notes?.is_done ? "blue" : "yellow"}` }}
-      ></div>
-      <h3 className="font-semibold text-xl text-gray-800 mb-2">Note</h3>
-      {isEditing && (
-        <button
-          className="text-blue-500 text-sm hover:underline"
-          onClick={(e) => {
-            onEdit(isEditing);
-          }}
-        >
-          Cancel
-        </button>
-      )}
-      <textarea
-        name="note"
-        id="note"
-        cols={40}
-        rows={4}
-        className={` p-3  rounded-lg text-gray-700 
-          ${isEditing ? "border-2" : "border-none cursor-not-allowed"}`}
-        style={{ background: `${notes?.color}` }}
-        disabled={!isEditing}
-        value={note?.note}
-        onChange={(e) => inputChange(e, setNote)}
-      ></textarea>
+    <div className="flex flex-row flex-wrap border-2 border-black gap-5 p-5">
+      {updatedNotes?.map((items: any, index: number) => {
+        const date = new Date(items?.expiration_date);
+        const expiration_date = date.toLocaleDateString("en-GB");
+        const isCurrentNoteEditing = items.id === editingNoteId;
 
-      <div className="absolute bottom-4 right-4 text-gray-600 text-sm">
-        {expiration_date}
-      </div>
+        return (
+          <div
+            className={`relative p-7 rounded-lg shadow-lg w-[20%] h-60 flex flex-col justify-between`}
+            style={{ backgroundColor: items?.color }}
+            key={index}
+          >
+            <div
+              className={`absolute top-0 left-0 w-8 h-8 rotate-45 transform -translate-x-2 -translate-y-2`}
+              style={{ background: `${items?.is_done ? "blue" : "yellow"}` }}
+            ></div>
+            <h3 className="font-semibold text-xl text-gray-800 mb-2">Note</h3>
 
-      <div className="absolute top-4 right-4 flex gap-2">
-        {notes?.is_done == false ? (
-          <button
-            className="text-blue-500 text-sm hover:underline"
-            onClick={onMarkDone}
-          >
-            Mark Done
-          </button>
-        ) : (
-          <button
-            className="text-blue-500 text-sm hover:underline"
-            onClick={onMarkDone}
-          >
-            Mark UnDone
-          </button>
-        )}
-        {!isEditing ? (
-          <button
-            className="text-blue-500 text-sm hover:underline"
-            onClick={() => onEdit(isEditing)}
-          >
-            Edit
-          </button>
-        ) : (
-          <button
-            className="text-blue-500 text-sm hover:underline"
-            onClick={(e) => {
-              onEdit(isEditing);
-              onUpdate(e);
-            }}
-          >
-            Update
-          </button>
-        )}
-        <button
-          className="text-red-500 text-sm hover:underline"
-          onClick={(e) => {
-            onDelete(e, notes?.id);
-          }}
-        >
-          Remove
-        </button>
-      </div>
+            {isCurrentNoteEditing && (
+              <button
+                className="text-blue-500 text-sm hover:underline"
+                onClick={() => setEditingNoteId(null)} // Cancel edit mode
+              >
+                Cancel
+              </button>
+            )}
+
+            <textarea
+              name="note"
+              id="note"
+              cols={40}
+              rows={4}
+              className={`p-3 rounded-lg text-gray-700 ${
+                isCurrentNoteEditing
+                  ? "border-2"
+                  : "border-none cursor-not-allowed"
+              }`}
+              style={{ background: `${items?.color}` }}
+              disabled={!isCurrentNoteEditing}
+              value={items?.note} // Update this with the local updatedNotes value
+              onChange={(e) => handleChange(e, items.id)} // Capture onChange to update the state
+            ></textarea>
+
+            <div className="absolute bottom-4 right-4 text-gray-600 text-sm">
+              {expiration_date}
+            </div>
+
+            <div className="absolute top-4 right-4 flex gap-2">
+              {items?.is_done === false ? (
+                <button
+                  className="text-blue-500 text-sm hover:underline"
+                  onClick={(e) => onMarkDone(e, items?.id, items?.is_done)}
+                >
+                  Mark Done
+                </button>
+              ) : (
+                <button
+                  className="text-blue-500 text-sm hover:underline"
+                  onClick={(e) => onMarkDone(e, items?.id, items?.is_done)}
+                >
+                  Mark UnDone
+                </button>
+              )}
+
+              {!isCurrentNoteEditing ? (
+                <button
+                  className="text-blue-500 text-sm hover:underline"
+                  onClick={() => onEdit(items.id)} // Edit this specific note
+                >
+                  Edit
+                </button>
+              ) : (
+                <button
+                  className="text-blue-500 text-sm hover:underline"
+                  onClick={(e) => {
+                    onUpdate(items.id, items.note); // Pass the note ID and content to update
+                  }}
+                >
+                  Update
+                </button>
+              )}
+
+              <button
+                className="text-red-500 text-sm hover:underline"
+                onClick={(e) => {
+                  onDelete(e, items?.id);
+                }}
+              >
+                Remove
+              </button>
+            </div>
+          </div>
+        );
+      })}
     </div>
   );
 };

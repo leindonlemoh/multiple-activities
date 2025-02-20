@@ -21,7 +21,7 @@ const Register = () => {
     if (response?.status === 200) {
       Swal.fire({
         title: "Message Sent!",
-        text: "Your message was successfully added.",
+        text: "Please Check your email",
         icon: "success",
         confirmButtonText: "OK",
       }).then(() => {
