@@ -4,6 +4,7 @@ import { createClient } from "@/utils/supabase/server";
 type Notes = {
   note: string;
   date: string;
+  priority:string;
   color: string;
 };
 
@@ -24,6 +25,7 @@ export async function addNotes(formData: Notes) {
       note: formData?.note,
       expiration_date: formData?.date,
       color: formData?.color,
+      priority: formData?.priority,
       posted_by: user?.id,
     },
   ]);
@@ -43,6 +45,7 @@ export async function updateNote(formData: any) {
 
   const request = {
     note: formData?.note,
+    priority:formData?.priority,
     is_done: formData?.is_done,
   };
   const {

@@ -39,10 +39,11 @@ const Notes = () => {
     setEditingNoteId(id); // Set the note to edit
   };
 
-  const onUpdate = async (id: number, noteContent: string) => {
+  const onUpdate = async (id: number, noteContent: string, priority:string) => {
     const updatedNote = {
       id,
       note: noteContent,
+      priority: priority,
     };
 
     const response = await updateNote(updatedNote); // Update the note
@@ -85,15 +86,19 @@ const Notes = () => {
     }
   };
 
-  const handleChange = (
-    e: React.ChangeEvent<HTMLTextAreaElement>,
-    id: number
-  ) => {
-    const updatedNotesList = updatedNotes.map((item) =>
+  const handleChange = (e: any, id: number, from:string) => {
+ if(from =='note'){ const updatedNotesList = updatedNotes.map((item) =>
       item.id === id ? { ...item, note: e.target.value } : item
     );
     setUpdatedNotes(updatedNotesList);
+  }else if(from == 'priority'){
+const updatedNotesList = updatedNotes.map((item) =>
+      item.id === id ? { ...item, priority: e.target.value } : item
+    );
+    setUpdatedNotes(updatedNotesList);
+  }
   };
+
   const onMarkDone = async (e: any, id: number, is_done: boolean) => {
     const updateStatus = {
       id: id,
@@ -161,9 +166,22 @@ const Notes = () => {
               style={{ background: `${items?.color}` }}
               disabled={!isCurrentNoteEditing}
               value={items?.note} // Update this with the local updatedNotes value
-              onChange={(e) => handleChange(e, items.id)} // Capture onChange to update the state
+              onChange={(e) => handleChange(e, items.id, 'note')} // Capture onChange to update the state
             ></textarea>
+ {isCurrentNoteEditing ? <div>
+              <select className="border-2 border-black" name="priority" id="priority"
+              value={items?.priority}
+              onChange={(e)=>handleChange(e, items.id, 'priority')}
+          >
+  <option value="LOW">LOW</option>
+  <option value="MEDIUM">MEDIUM</option>
+  <option value="HIGH">HIGH</option>
 
+</select>
+  </div>:
+  <div>
+<h2>Prioirty: {items?.priority}</h2>
+  </div>}
             <div className="absolute bottom-4 right-4 text-gray-600 text-sm">
               {expiration_date}
             </div>
@@ -196,7 +214,7 @@ const Notes = () => {
                 <button
                   className="text-blue-500 text-sm hover:underline"
                   onClick={(e) => {
-                    onUpdate(items.id, items.note); // Pass the note ID and content to update
+                    onUpdate(items.id, items.note , items?.priority); // Pass the note ID and content to update
                   }}
                 >
                   Update
