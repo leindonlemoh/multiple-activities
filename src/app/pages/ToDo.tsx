@@ -14,7 +14,7 @@ const ToDo = () => {
   const [noteList, setNoteList] = useState({
     note: condition?.note || "",
     date: condition?.date || "",
-    priority: condition?.priority || "",
+    priority: condition?.priority || "LOW",
     color: condition?.color || "#e9ff70",
   });
 
