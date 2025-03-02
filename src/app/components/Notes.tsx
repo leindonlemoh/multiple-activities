@@ -39,14 +39,18 @@ const Notes = () => {
     setEditingNoteId(id); // Set the note to edit
   };
 
-  const onUpdate = async (id: number, noteContent: string, priority:string) => {
+  const onUpdate = async (
+    id: number,
+    noteContent: string,
+    priority: string
+  ) => {
     const updatedNote = {
       id,
       note: noteContent,
       priority: priority,
     };
 
-    const response = await updateNote(updatedNote); // Update the note
+    const response = await updateNote(updatedNote);
     if (response?.status === 200) {
       Swal.fire({
         position: "center",
@@ -57,7 +61,7 @@ const Notes = () => {
       }).then(() => {
         mutate("saved_notes");
       });
-      setEditingNoteId(null); // Reset editing mode after updating
+      setEditingNoteId(null);
     } else {
       Swal.fire({
         position: "center",
@@ -86,17 +90,18 @@ const Notes = () => {
     }
   };
 
-  const handleChange = (e: any, id: number, from:string) => {
- if(from =='note'){ const updatedNotesList = updatedNotes.map((item) =>
-      item.id === id ? { ...item, note: e.target.value } : item
-    );
-    setUpdatedNotes(updatedNotesList);
-  }else if(from == 'priority'){
-const updatedNotesList = updatedNotes.map((item) =>
-      item.id === id ? { ...item, priority: e.target.value } : item
-    );
-    setUpdatedNotes(updatedNotesList);
-  }
+  const handleChange = (e: any, id: number, from: string) => {
+    if (from == "note") {
+      const updatedNotesList = updatedNotes.map((item) =>
+        item.id === id ? { ...item, note: e.target.value } : item
+      );
+      setUpdatedNotes(updatedNotesList);
+    } else if (from == "priority") {
+      const updatedNotesList = updatedNotes.map((item) =>
+        item.id === id ? { ...item, priority: e.target.value } : item
+      );
+      setUpdatedNotes(updatedNotesList);
+    }
   };
 
   const onMarkDone = async (e: any, id: number, is_done: boolean) => {
@@ -147,7 +152,7 @@ const updatedNotesList = updatedNotes.map((item) =>
             {isCurrentNoteEditing && (
               <button
                 className="text-blue-500 text-sm hover:underline"
-                onClick={() => setEditingNoteId(null)} // Cancel edit mode
+                onClick={() => setEditingNoteId(null)}
               >
                 Cancel
               </button>
@@ -165,23 +170,28 @@ const updatedNotesList = updatedNotes.map((item) =>
               }`}
               style={{ background: `${items?.color}` }}
               disabled={!isCurrentNoteEditing}
-              value={items?.note} // Update this with the local updatedNotes value
-              onChange={(e) => handleChange(e, items.id, 'note')} // Capture onChange to update the state
+              value={items?.note}
+              onChange={(e) => handleChange(e, items.id, "note")}
             ></textarea>
- {isCurrentNoteEditing ? <div>
-              <select className="border-2 border-black" name="priority" id="priority"
-              value={items?.priority}
-              onChange={(e)=>handleChange(e, items.id, 'priority')}
-          >
-  <option value="LOW">LOW</option>
-  <option value="MEDIUM">MEDIUM</option>
-  <option value="HIGH">HIGH</option>
-
-</select>
-  </div>:
-  <div>
-<h2>Prioirty: {items?.priority}</h2>
-  </div>}
+            {isCurrentNoteEditing ? (
+              <div>
+                <select
+                  className="border-2 border-black"
+                  name="priority"
+                  id="priority"
+                  value={items?.priority}
+                  onChange={(e) => handleChange(e, items.id, "priority")}
+                >
+                  <option value="LOW">LOW</option>
+                  <option value="MEDIUM">MEDIUM</option>
+                  <option value="HIGH">HIGH</option>
+                </select>
+              </div>
+            ) : (
+              <div>
+                <h2>Prioirty: {items?.priority}</h2>
+              </div>
+            )}
             <div className="absolute bottom-4 right-4 text-gray-600 text-sm">
               {expiration_date}
             </div>
@@ -206,7 +216,7 @@ const updatedNotesList = updatedNotes.map((item) =>
               {!isCurrentNoteEditing ? (
                 <button
                   className="text-blue-500 text-sm hover:underline"
-                  onClick={() => onEdit(items.id)} // Edit this specific note
+                  onClick={() => onEdit(items.id)}
                 >
                   Edit
                 </button>
@@ -214,7 +224,7 @@ const updatedNotesList = updatedNotes.map((item) =>
                 <button
                   className="text-blue-500 text-sm hover:underline"
                   onClick={(e) => {
-                    onUpdate(items.id, items.note , items?.priority); // Pass the note ID and content to update
+                    onUpdate(items.id, items.note, items?.priority);
                   }}
                 >
                   Update

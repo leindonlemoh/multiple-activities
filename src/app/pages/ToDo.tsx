@@ -59,7 +59,7 @@ const ToDo = () => {
           setNoteList({
             note: "",
             date: "",
-            priority:"",
+            priority: "",
             color: "#e9ff70",
           });
         });

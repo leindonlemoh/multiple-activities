@@ -31,16 +31,19 @@ const AddNotesForm = ({
             onChange={onChangeSaved}
           ></textarea>
         </div>
-        <div  className="border-2 rounded-lg mb-4">
-          <label >Priority: </label>
-          <select className="border-2 border-black" name="priority" id="priority" value={noteList?.priority}
-          onChange={onChangeSaved}
+        <div className="border-2 rounded-lg mb-4">
+          <label>Priority: </label>
+          <select
+            className="border-2 border-black"
+            name="priority"
+            id="priority"
+            value={noteList?.priority}
+            onChange={onChangeSaved}
           >
-  <option value="LOW">LOW</option>
-  <option value="MEDIUM">MEDIUM</option>
-  <option value="HIGH">HIGH</option>
-
-</select>
+            <option value="LOW">LOW</option>
+            <option value="MEDIUM">MEDIUM</option>
+            <option value="HIGH">HIGH</option>
+          </select>
         </div>
         <div>
           <input
@@ -70,7 +73,7 @@ const AddNotesForm = ({
                 }`}
                 onClick={() => {
                   setSelectedBUtton(color);
-                  onChangeSaved({ target: { name: "color", value: color } }); // Update color in noteList
+                  onChangeSaved({ target: { name: "color", value: color } });
                 }}
                 style={{ background: color }}
               ></button>
